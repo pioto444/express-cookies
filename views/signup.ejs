@@ -1,0 +1,19 @@
+<%- include("headpartial-login.ejs") %>
+
+    <main>
+        <h1>Sign up</h1>
+        <form action="/signup" method="POST">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            <br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <br>
+            <label for="confirmPassword">Powtórz hasło:</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required>
+            <br>
+            <button type="submit">Sign up</button>
+        </form>
+    </main>
+
+<%- include("footpartial.ejs") %>

@@ -1,16 +1,29 @@
 {
-  "name": "hello-express",
+  "name": "express-cookies",
   "version": "1.0.0",
-  "description": "",
-  "license": "ISC",
-  "author": "",
-  "type": "module",
+  "description": "site for making own recipies",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pioto444/express-cookies.git"
+  },
+  "author": "Piotr Barabanow",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pioto444/express-cookies/issues"
+  },
+  "homepage": "https://github.com/pioto444/express-cookies#readme",
   "dependencies": {
-    "ejs": "^3.1.10",
-    "express": "^5.1.0"
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.3.1",
+    "ejs": "^5.0.1",
+    "express": "^5.2.1",
+    "node": "^25.8.1",
+    "pug": "^3.0.4"
   }
 }
