@@ -18,6 +18,10 @@ app.get("/signup", (req, res) => {
     res.render("signup", { title: "Sign up" });
 });
 
+app.get("/change-password", (req, res) => {
+    res.render("change-password", { title: "Change Password" });
+});
+
 app.post("/signup", (req, res) => {
     if (req.body.password !== req.body.confirm_password) {
         return res.status(400).send("Passwords do not match");

@@ -22,7 +22,14 @@ main {
     height: 50vh;
     border-radius: 3%;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    gap: 1.5rem;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .navy-button {
@@ -44,4 +51,35 @@ main {
 
 .navy-button:hover {
   background-color: #000050;   
+}
+
+.password {
+    color: #000080;
+    font-size: 14px;
+}
+
+button[type="submit"] {
+  width: 100px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;        
+  background-color: #000080;   
+  color: white;             
+  padding: 12px 24px;          
+  text-decoration: none;       
+  font-family: sans-serif;
+  font-weight: bold;
+  border-radius: 4px;          
+  transition: background 0.3s; 
+  font-size: 15px;
+  border: none;
+}
+
+button[type="submit"]:hover {
+  background-color: #000050;   
+}
+
+h1 {
+  margin-bottom: 10px;
 }
