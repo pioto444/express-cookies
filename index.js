@@ -1,7 +1,7 @@
 import  express  from "express";
 import "dotenv/config";
 import bcrypt from "bcrypt";
-import { add_User, check_For_User } from "./forms/user.js";
+import { add_User, getAdmin, getUser } from "./forms/user.js";
 
 const port = process.env.PORT;
 const app = express();
@@ -21,6 +21,9 @@ app.post("/signup", (req, res) => {
     if (req.body.password !== req.body.confirm_password) {
         return res.status(400).send("Passwords do not match");
     }
+    else if (check_For_User(req.body.username, req.body.email)) {
+        return res.status(400).send("User already exists");
+    }
     else {
         const { username, email } = req.body;
         const passwordHash = bcrypt.hashSync(req.body.password, 10);
@@ -31,15 +34,22 @@ app.post("/signup", (req, res) => {
 });
 
 app.post("/login", (req, res) => { 
-    if ((req.body.username === process.env.ADMIN_USERNAME || req.body.email === process.env.ADMIN_EMAIL) && bcrypt.compareSync(req.body.password, process.env.ADMIN_PASSWORD)) {
-        res.render("welcome", { title: "Welcome", username: req.body.username });
-    } 
-    else if (check_For_User(req.body.username, req.body.email)) {
-        res.render("welcome", { title: "Welcome", username: req.body.username });
-    } 
-    else {
-        res.status(401).send("Login failed");
+    const user = getUser(req.body.username, req.body.email);
+
+    if (!user) {
+        return res.status(401).send("User not found");
     }
+
+    const storedHash = user.passwordHash;
+    
+    if (!storedHash || !bcrypt.compareSync(req.body.password, storedHash)) {
+        return res.status(401).send("Invalid credentials");
+    }
+
+    const isAdmin = user.role === "admin";
+
+    res.render("welcome", { title: "Welcome", username: user.username, role: isAdmin ? "admin" : "user" });
+
 });
 
 app.listen(port, () => {

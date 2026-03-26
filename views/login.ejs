@@ -3,8 +3,8 @@
     <main>
         <h1>Login</h1>
         <form action="/login" method="POST">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
+            <label for="email">Email:</label>
+            <input type="text" id="email" name="email" required>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
         </form>
@@ -13,4 +13,4 @@
         <a class="navy-button" href="/signup">Sign up</a>
     </main>
 
-<%- include("footpartial.ejs") %>
+<%- include("footpartial-login.ejs") %>

@@ -7,7 +7,6 @@ const db = new DatabaseSync(db_path);
 db.exec(`
     CREATE TABLE IF NOT EXISTS users (
         id              INT PRIMARY KEY,
-        username        VARCHAR(50),
         email           VARCHAR(100),
         password_hash   TEXT,
         created_at      TIMESTAMP,
@@ -19,57 +18,69 @@ db.exec(`
 
 const db_ops = {
     add_User : db.prepare(`
-        INSERT INTO users (username, email, password_hash, created_at, last_login, role, is_active)
+        INSERT INTO users (email, password_hash, created_at, last_login, role, is_active)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     `),
     delete_User : db.prepare(`
         DELETE FROM users WHERE id = ?
     `),
     update_User : db.prepare(`
-        UPDATE users SET username = ?, email = ?, password_hash = ?, last_login = ?, role = ?, is_active = ?
+        UPDATE users SET email = ?, password_hash = ?, last_login = ?, role = ?, is_active = ?
         WHERE id = ?
     `),
     check_For_User : db.prepare(`
-        SELECT * FROM users WHERE username = ? OR email = ?
-    `)
+        SELECT * FROM users WHERE email = ?
+    `),
 }
 
 function add_Admin() {
-    const username = process.env.admin-username;
     const email = process.env.admin-email;
-    const passwordHash = bcrypt.hashSync(process.env.admin-password, 10);
+    const adminPlain = process.env.admin-password || "";
+    const passwordHash = bcrypt.hashSync(adminPlain, 10);
     const createdAt = new Date().toISOString();
     const lastLogin = createdAt;
     const role = "admin";
     const isActive = true;
 
-    db_ops.add_User.run(username, email, passwordHash, createdAt, lastLogin, role, isActive);
+    db_ops.add_User.run(email, passwordHash, createdAt, lastLogin, role, isActive);
 }
 
-function add_User(username, email, password) {         
+function add_User(email, password) {  
+    
+        const passwordHash = typeof password === "string" && password.startsWith("$2") ? password : bcrypt.hashSync(password, 10);
         const createdAt = new Date().toISOString();
         const lastLogin = createdAt;
         const role = "user";
         const isActive = true;
 
-        db_ops.add_User.run(username, email, password, createdAt, lastLogin, role, isActive);
+        db_ops.add_User.run(email, passwordHash, createdAt, lastLogin, role, isActive);
 }
 
 function delete_User(id) {
     db_ops.delete_User.run(id);
 }
 
-function update_User(id, username, email, password, lastLogin, role, isActive) {
-    db_ops.update_User.run(username, email, password, lastLogin, role, isActive, id);
+function update_User(id, email, password, lastLogin, role, isActive) {
+    const passwordHash = typeof password === "string" && password.startsWith("$2") ? password : bcrypt.hashSync(password, 10);
+    db_ops.update_User.run(email, passwordHash, lastLogin, role, isActive, id);
 }
 
-function check_For_User (username, email) {
-    db_ops.check_For_User.get(username, email);
+function getUser(email) {
+    const user =  db_ops.check_For_User.get(email);
+    if (!user) return null;
+
+    user.passwordHash = user.password_hash;
+    return user;
+}
+
+function getAdmin(email, password) {
+    return (email === process.env.ADMIN_EMAIL) && bcrypt.compareSync(password, process.env.ADMIN_PASSWORD);
 }
 
 export { 
     add_User,
     delete_User,
     update_User,
-    check_For_User
+    getUser,
+    getAdmin
 };

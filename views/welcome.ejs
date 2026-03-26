@@ -1,0 +1,11 @@
+<%- include("headpartial.ejs") %>
+
+    <main>
+        <% if (role === "admin") { %>
+            <h1>Welcome Admin</h1>
+        <% } else { %>
+            <h1>Welcome <%= username %></h1>
+        <% } %>
+    </main>
+
+<%- include("footpartial.ejs") %>
