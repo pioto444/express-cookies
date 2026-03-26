@@ -29,6 +29,9 @@ const db_ops = {
         UPDATE users SET username = ?, email = ?, password_hash = ?, last_login = ?, role = ?, is_active = ?
         WHERE id = ?
     `),
+    check_For_User : db.prepare(`
+        SELECT * FROM users WHERE username = ? OR email = ?
+    `)
 }
 
 function add_Admin() {
@@ -60,8 +63,13 @@ function update_User(id, username, email, password, lastLogin, role, isActive) {
     db_ops.update_User.run(username, email, password, lastLogin, role, isActive, id);
 }
 
+function check_For_User (username, email) {
+    db_ops.check_For_User.get(username, email);
+}
+
 export { 
     add_User,
     delete_User,
-    update_User
+    update_User,
+    check_For_User
 };

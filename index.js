@@ -1,8 +1,7 @@
 import  express  from "express";
 import "dotenv/config";
-import { title } from "node:process";
 import bcrypt from "bcrypt";
-import { add_User } from "./forms/user.js";
+import { add_User, check_For_User } from "./forms/user.js";
 
 const port = process.env.PORT;
 const app = express();
@@ -16,10 +15,6 @@ app.get("/login", (req, res) => {
 
 app.get("/signup", (req, res) => {
     res.render("signup", { title: "Sign up" });
-});
-
-app.get("/change-password", (req, res) => {
-    res.render("change-password", { title: "Change Password" });
 });
 
 app.post("/signup", (req, res) => {
@@ -36,7 +31,15 @@ app.post("/signup", (req, res) => {
 });
 
 app.post("/login", (req, res) => { 
-    
+    if ((req.body.username === process.env.ADMIN_USERNAME || req.body.email === process.env.ADMIN_EMAIL) && bcrypt.compareSync(req.body.password, process.env.ADMIN_PASSWORD)) {
+        res.render("welcome", { title: "Welcome", username: req.body.username });
+    } 
+    else if (check_For_User(req.body.username, req.body.email)) {
+        res.render("welcome", { title: "Welcome", username: req.body.username });
+    } 
+    else {
+        res.status(401).send("Login failed");
+    }
 });
 
 app.listen(port, () => {
