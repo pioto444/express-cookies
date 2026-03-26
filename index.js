@@ -19,7 +19,7 @@ app.get("/signup", (req, res) => {
 
 app.post("/signup", (req, res) => {
     if (req.body.password !== req.body.confirm_password) {
-        return res.status(400).send("Passwords do not match");
+        return res.status(400).send("Passwords do not match");  
     }
     else if (check_For_User(req.body.username, req.body.email)) {
         return res.status(400).send("User already exists");
@@ -34,7 +34,7 @@ app.post("/signup", (req, res) => {
 });
 
 app.post("/login", (req, res) => { 
-    const user = getUser(req.body.username, req.body.email);
+    const user = getUser(req.body.email);
 
     if (!user) {
         return res.status(401).send("User not found");
@@ -48,7 +48,7 @@ app.post("/login", (req, res) => {
 
     const isAdmin = user.role === "admin";
 
-    res.render("welcome", { title: "Welcome", username: user.username, role: isAdmin ? "admin" : "user" });
+    res.render("welcome", { title: "Welcome", username: user.email, role: isAdmin ? "admin" : "user" });
 
 });
 

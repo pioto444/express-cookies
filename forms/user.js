@@ -19,7 +19,7 @@ db.exec(`
 const db_ops = {
     add_User : db.prepare(`
         INSERT INTO users (email, password_hash, created_at, last_login, role, is_active)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?)
     `),
     delete_User : db.prepare(`
         DELETE FROM users WHERE id = ?
