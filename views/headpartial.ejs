@@ -17,4 +17,13 @@
             <img src="" alt="">
             <img src="" alt="" >
         </nav>
+        <section>
+            <a href="/settings/toggle-theme?next=<%- encodeURIComponent(page) %>">
+                <% if (app.theme === 'dark') { %>
+                    <strong>Dark</strong> | Light
+                <% } else { %>                    
+                    Dark | <strong>Light</strong>
+                <% } %>
+            </a>
+        </section>
     </header>

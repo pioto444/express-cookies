@@ -1,11 +1,50 @@
 <%- include("headpartial.ejs") %>
 
-    <main>
-        <% if (role === "admin") { %>
-            <h1>Welcome Admin</h1>
-        <% } else { %>
-            <h1>Welcome <%= username %></h1>
-        <% } %>
-    </main>
+<main>
+    <% if (typeof isAdmin !== 'undefined' && isAdmin && typeof isAdminViewingUser !== 'undefined' && !isAdminViewingUser) { %>
+        <!-- Admin widzi listę użytkowników -->
+        <h1>Admin Panel – All Users</h1>
+        <ul>
+            <% users.forEach(user => { %>
+                <li>
+                    <a href="/user/<%= user.email %>/recipes">
+                        <%= user.email %> 
+                        <small>(<%= user.role || 'user' %>)</small>
+                    </a>
+                </li>
+            <% }) %>
+        </ul>
+
+    <% } else if (typeof isAdminViewingUser !== 'undefined' && isAdminViewingUser) { %>
+        <!-- Admin przegląda przepisy wybranego użytkownika -->
+        <h1>Recipes of <%= viewedUserEmail %></h1>
+        <p><a href="/welcome">← Back to all users</a></p>
+        
+        <ul>
+            <% recipes.forEach(recipe => { %>
+                <li>
+                    <a href="/recipes/<%= recipe.id %>"><%= recipe.name %></a>
+                    <% if (isAdmin) { %>
+                        | <a href="/recipes/<%= recipe.id %>/edit">Edit</a>
+                    <% } %>
+                </li>
+            <% }) %>
+        </ul>
+
+        <a href="/add-recipe">Add new recipe for <%= viewedUserEmail %></a>
+
+    <% } else { %>
+        <!-- Zwykły użytkownik -->
+        <h1>Welcome <%= username %></h1>
+        
+        <ul>
+            <% recipes.forEach(recipe => { %>
+                <li><a href="/recipes/<%= recipe.id %>"><%= recipe.name %></a></li>
+            <% }) %>
+        </ul>
+
+        <a href="/add-recipe">Add Recipe</a>
+    <% } %>
+</main>
 
 <%- include("footpartial.ejs") %>

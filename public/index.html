@@ -29,5 +29,30 @@
     <footer>
         <p>Site was created by: Piotr Barabanow 3c</p>
     </footer>
+
+    <div id="cookie-popup">
+        Ta strona używa plików cookie 🍪
+        <button onclick="acceptCookies()">Akceptuję</button>
+        <button onclick="rejectCookies()">Odrzuć</button>
+        <a href="/privacy-policy">Polityka prywatności</a>
+    </div>
+
+    <script>
+        function acceptCookies() {
+            localStorage.setItem("cookiesAccepted", "true");
+            document.getElementById("cookie-popup").style.display = "none";
+        }
+
+        function rejectCookies() {
+            localStorage.setItem("cookiesAccepted", "false");
+            document.getElementById("cookie-popup").style.display = "none";
+        }
+
+        window.onload = function() {
+            if (!localStorage.getItem("cookiesAccepted")) {
+            document.getElementById("cookie-popup").style.display = "block";
+            }
+        }
+    </script>
 </body>
 </html>

@@ -1,13 +1,13 @@
 import { DatabaseSync } from "node:sqlite";
 import bcrypt from "bcrypt";
 
-const db_path = "./db.sqlite";
+const db_path = "./recipes.sqlite";
 const db = new DatabaseSync(db_path);
 
 db.exec(`
     CREATE TABLE IF NOT EXISTS users (
-        id              INT PRIMARY KEY,
-        email           VARCHAR(100),
+        id              INTEGER PRIMARY KEY AUTOINCREMENT,
+        email           VARCHAR(100) UNIQUE,
         password_hash   TEXT,
         created_at      TIMESTAMP,
         last_login      TIMESTAMP,
@@ -21,6 +21,10 @@ const db_ops = {
         INSERT INTO users (email, password_hash, created_at, last_login, role, is_active)
         VALUES (?, ?, ?, ?, ?, ?)
     `),
+    add_Admin : db.prepare(`
+        INSERT OR IGNORE INTO users (email, password_hash, created_at, last_login, role, is_active)
+        VALUES (?, ?, ?, ?, ?, ?)
+    `),
     delete_User : db.prepare(`
         DELETE FROM users WHERE id = ?
     `),
@@ -31,6 +35,11 @@ const db_ops = {
     check_For_User : db.prepare(`
         SELECT * FROM users WHERE email = ?
     `),
+    get_All_Users : db.prepare(`
+        SELECT id, email, role, created_at, last_login 
+        FROM users 
+        ORDER BY email ASC
+    `)
 }
 
 function add_Admin() {
@@ -40,9 +49,9 @@ function add_Admin() {
     const createdAt = new Date().toISOString();
     const lastLogin = createdAt;
     const role = "admin";
-    const isActive = true;
+    const isActive = 1;
 
-    db_ops.add_User.run(email, passwordHash, createdAt, lastLogin, role, isActive);
+    db_ops.add_Admin.run(email, passwordHash, createdAt, lastLogin, role, isActive);
 }
 
 function add_User(email, password) {  
@@ -51,7 +60,7 @@ function add_User(email, password) {
         const createdAt = new Date().toISOString();
         const lastLogin = createdAt;
         const role = "user";
-        const isActive = true;
+        const isActive = 1;
 
         db_ops.add_User.run(email, passwordHash, createdAt, lastLogin, role, isActive);
 }
@@ -77,10 +86,16 @@ function getAdmin(email, password) {
     return (email === process.env.ADMIN_EMAIL) && bcrypt.compareSync(password, process.env.ADMIN_PASSWORD);
 }
 
+function getAllUsers() {
+    return db_ops.get_All_Users.all();
+}
+
 export { 
     add_User,
     delete_User,
     update_User,
     getUser,
-    getAdmin
+    getAdmin,
+    add_Admin,
+    getAllUsers
 };

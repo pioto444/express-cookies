@@ -1,0 +1,31 @@
+<%- include("headpartial.ejs") %>
+
+    <main>
+        <h1><%= recipe.name %></h1>
+
+        <h2>Ingredients</h2>
+        <% if (recipe.ingredients && recipe.ingredients.length > 0) { %>
+            <ul>
+                <% recipe.ingredients.forEach(item => { %>
+                    <li><%= item.amount ? `${item.amount} ` : "" %><%= item.name %></li>
+                <% }) %>
+            </ul>
+        <% } else { %>
+            <p>No ingredients recorded yet.</p>
+        <% } %>
+
+        <h2>Instructions</h2>
+        <% if (recipe.instructions && recipe.instructions.length > 0) { %>
+            <ol>
+                <% recipe.instructions.forEach(step => { %>
+                    <li><%= step.text %></li>
+                <% }) %>
+            </ol>
+        <% } else { %>
+            <p>No instructions recorded yet.</p>
+        <% } %>
+
+        <p><a href="/welcome">Back to recipes</a></p>
+    </main>
+
+<%- include("footpartial.ejs") %>

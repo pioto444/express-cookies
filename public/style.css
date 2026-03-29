@@ -73,3 +73,21 @@ footer {
 .navy-button:hover {
   background-color: #000050;   
 }
+
+#cookie-popup {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #222;
+  color: #fff;
+  padding: 15px;
+  text-align: center;
+  display: none;
+  z-index: 1000;
+}
+
+#cookie-popup button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
