@@ -1,7 +1,7 @@
 <%- include("headpartial.ejs") %>
 
 <main>
-    <% if (typeof isAdmin !== 'undefined' && isAdmin && typeof isAdminViewingUser !== 'undefined' && !isAdminViewingUser) { %>
+    <% if (isAdmin && !isAdminViewingUser) { %>
         <!-- Admin widzi listę użytkowników -->
         <h1>Admin Panel – All Users</h1>
         <ul>
@@ -15,7 +15,7 @@
             <% }) %>
         </ul>
 
-    <% } else if (typeof isAdminViewingUser !== 'undefined' && isAdminViewingUser) { %>
+    <% } else if (isAdmin && isAdminViewingUser) { %>
         <!-- Admin przegląda przepisy wybranego użytkownika -->
         <h1>Recipes of <%= viewedUserEmail %></h1>
         <p><a href="/welcome">← Back to all users</a></p>
@@ -24,9 +24,7 @@
             <% recipes.forEach(recipe => { %>
                 <li>
                     <a href="/recipes/<%= recipe.id %>"><%= recipe.name %></a>
-                    <% if (isAdmin) { %>
                         | <a href="/recipes/<%= recipe.id %>/edit">Edit</a>
-                    <% } %>
                 </li>
             <% }) %>
         </ul>

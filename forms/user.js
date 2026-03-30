@@ -42,10 +42,7 @@ const db_ops = {
     `)
 }
 
-function add_Admin() {
-    const email = process.env.admin-email;
-    const adminPlain = process.env.admin-password || "";
-    const passwordHash = bcrypt.hashSync(adminPlain, 10);
+function add_Admin(email, passwordHash) {
     const createdAt = new Date().toISOString();
     const lastLogin = createdAt;
     const role = "admin";
@@ -55,7 +52,6 @@ function add_Admin() {
 }
 
 function add_User(email, password) {  
-    
         const passwordHash = typeof password === "string" && password.startsWith("$2") ? password : bcrypt.hashSync(password, 10);
         const createdAt = new Date().toISOString();
         const lastLogin = createdAt;

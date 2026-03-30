@@ -1,7 +1,7 @@
 import  express  from "express";
 import "dotenv/config";
 import bcrypt from "bcrypt";
-import { add_User, getUser, getAllUsers } from "./forms/user.js";
+import { add_User, getUser, getAllUsers, add_Admin } from "./forms/user.js";
 import { 
     add_Recipe, 
     get_Recipes, 
@@ -126,7 +126,8 @@ if (req.user && req.user.role === "admin") {
             users: allUsers,
             isAdmin: true,
             isAdminViewingUser: false,
-            recipes: []
+            recipes: [],
+            viewedUserEmail: null
         });
     } else {
         const recipes = get_Recipes();
@@ -200,16 +201,19 @@ app.post("/login", (req, res) => {
         return res.status(401).send("Invalid credentials");
     }
 
+    const allUsers = user.role === "admin" ? getAllUsers() : [];
+
     res.cookie("userEmail", user.email, { 
     ...settings.CookieOptions, 
     signed: true 
     });
 
-res.render("welcome", { 
+    res.render("welcome", { 
         title: "Welcome", 
         username: user.email, 
         role: user.role || "user",
         recipes: recipes,
+        users: allUsers,
         user: { email: user.email, role: user.role || "user" },
         isAdmin: user.role === "admin",
         isAdminViewingUser: false
