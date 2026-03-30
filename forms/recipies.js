@@ -40,6 +40,10 @@ const db_ops = {
         INSERT INTO ingredients (recipe_id, name, amount)
         VALUES (?, ?, ?)
     `),
+    add_Instruction : db.prepare(`
+        INSERT INTO instructions (recipe_id, instruction_num, instruction)
+        VALUES (?, ?, ?)
+    `),
     add_Recipe : db.prepare(`
         INSERT INTO recipes (name, user_email)
         VALUES (?, ?)
@@ -52,13 +56,15 @@ const db_ops = {
         WHERE user_email = ? 
         ORDER BY name
     `),
-    get_Recipe_Details : db.prepare(`
-        SELECT r.name AS recipe_name, i.name AS ingredient_name, i.amount, s.instruction_num, s.instruction
-        FROM recipes r
-        LEFT JOIN ingredients i ON r.id = i.recipe_id
-        LEFT JOIN instructions s ON r.id = s.recipe_id
-        WHERE r.id = ?
-        ORDER BY s.instruction_num
+    get_Recipe_Name : db.prepare(`
+        SELECT name FROM recipes WHERE id = ?
+    `),
+    get_Recipe_Ingredients : db.prepare(`
+        SELECT name, amount FROM ingredients WHERE recipe_id = ?
+    `),
+    get_Recipe_Instructions : db.prepare(`
+        SELECT instruction_num, instruction FROM instructions WHERE recipe_id = ?
+        ORDER BY instruction_num
     `),
     get_Recipe_For_Edit : db.prepare(`
         SELECT id, name, user_email 
@@ -71,6 +77,14 @@ const db_ops = {
         WHERE id = ?
     `)
 };
+
+function add_Ingredient(recipeId, name, amount) {
+    db_ops.add_Ingredient.run(recipeId, name, amount || null);
+}
+
+function add_Instruction(recipeId, instructionNum, instruction) {
+    db_ops.add_Instruction.run(recipeId, instructionNum, instruction);
+}
 
 function add_Recipe(name, userEmail) {
 if (!userEmail) throw new Error("userEmail is required when adding recipe");
@@ -87,7 +101,33 @@ function get_Recipes_By_User(email) {
 }
 
 function get_Recipe_Details(recipeId) {
-    return db_ops.get_Recipe_Details.all(recipeId);
+    const recipeRow = db_ops.get_Recipe_Name.get(recipeId);
+    if (!recipeRow) return [];
+    
+    const ingredients = db_ops.get_Recipe_Ingredients.all(recipeId);
+    const instructions = db_ops.get_Recipe_Instructions.all(recipeId);
+    
+    // Return combined result in the original format for backward compatibility
+    const result = [];
+    const maxLength = Math.max(ingredients.length, instructions.length);
+    
+    for (let i = 0; i < maxLength; i++) {
+        result.push({
+            recipe_name: recipeRow.name,
+            ingredient_name: ingredients[i]?.name || null,
+            amount: ingredients[i]?.amount || null,
+            instruction_num: instructions[i]?.instruction_num || null,
+            instruction: instructions[i]?.instruction || null
+        });
+    }
+    
+    return result.length > 0 ? result : [{
+        recipe_name: recipeRow.name,
+        ingredient_name: null,
+        amount: null,
+        instruction_num: null,
+        instruction: null
+    }];
 }
 
 function get_Recipe_For_Edit(recipeId) {
@@ -99,6 +139,8 @@ function update_Recipe(recipeId, name) {
 }
 
 export { 
+    add_Ingredient,
+    add_Instruction,
     add_Recipe,
     get_Recipes,
     get_Recipes_By_User,

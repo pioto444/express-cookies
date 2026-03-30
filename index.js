@@ -3,6 +3,8 @@ import "dotenv/config";
 import bcrypt from "bcrypt";
 import { add_User, getUser, getAllUsers, add_Admin } from "./forms/user.js";
 import { 
+    add_Ingredient,
+    add_Instruction,
     add_Recipe, 
     get_Recipes, 
     get_Recipes_By_User, 
@@ -93,7 +95,7 @@ app.get("/recipes/:id", (req, res) => {
 
     return res.render("recipe", {
         title: recipeName,
-        recipe: { name: recipeName, ingredients, instructions }
+        recipe: { id: recipeId, name: recipeName, ingredients, instructions }
     });
 });
 
@@ -167,6 +169,30 @@ app.get("/user/:email/recipes", (req, res) => {
         viewedUserEmail: targetEmail,
         users: []
     });
+});
+
+app.get("/recipes/:id/add-information", (req, res) => {
+    const recipeId = parseInt(req.params.id);
+    const recipeDetails = get_Recipe_Details(recipeId);
+
+    if (!recipeDetails || recipeDetails.length === 0) {
+        return res.status(404).send("Recipe not found");
+    }
+
+    const recipe = {
+        id: recipeId,
+        name: recipeDetails[0].recipe_name || "Untitled",
+    }
+
+    res.render("add-information", {
+        title: `Add Information to ${recipe.name}`,
+        recipe: recipe
+    });
+});
+
+app.get("/logout", (req, res) => {
+    res.clearCookie("userEmail");
+    res.redirect("/login");
 });
 
 app.post("/signup", (req, res) => {
@@ -244,6 +270,55 @@ app.post("/recipes/:id/edit", (req, res) => {
     }
 
     update_Recipe(recipeId, newName, req.user.email);
+    res.redirect(`/recipes/${recipeId}`);
+});
+
+app.post("/recipes/:id/add-information", (req, res) => {
+    if (!req.user) return res.redirect("/login");
+
+    const recipeId = parseInt(req.params.id);
+
+    // === SKŁADNIKI ===
+    let ingredients = [];
+    if (req.body.ingredients) {
+        // Przypadek 1: Express sparsował jako tablicę obiektów
+        if (Array.isArray(req.body.ingredients)) {
+            ingredients = req.body.ingredients;
+        } 
+        // Przypadek 2: Tylko jeden składnik → Express daje obiekt
+        else if (typeof req.body.ingredients === 'object' && req.body.ingredients !== null) {
+            ingredients = [req.body.ingredients];
+        }
+    }
+
+    ingredients.forEach(ing => {
+        // Bezpieczne wyciągnięcie wartości
+        const name   = String(ing?.name   || "").trim();
+        const amount = String(ing?.amount || "").trim();
+
+        if (name) {
+            add_Ingredient(recipeId, name, amount || null);
+        }
+    });
+
+    // === INSTRUKCJE ===
+    let instructions = [];
+    if (req.body.instructions) {
+        if (Array.isArray(req.body.instructions)) {
+            instructions = req.body.instructions;
+        } else {
+            instructions = [req.body.instructions];
+        }
+    }
+
+    instructions.forEach((text, index) => {
+        const instructionText = String(text || "").trim();
+
+        if (instructionText) {
+            add_Instruction(recipeId, index + 1, instructionText);
+        }
+    });
+
     res.redirect(`/recipes/${recipeId}`);
 });
 

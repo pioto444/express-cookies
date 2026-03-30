@@ -23,7 +23,14 @@
             </ol>
         <% } else { %>
             <p>No instructions recorded yet.</p>
+
         <% } %>
+
+        <% if (recipe.ingredients.length === 0 || recipe.instructions.length === 0) { %>
+            <p><em>Note: This recipe is incomplete. Please consider adding missing ingredients or instructions.</em></p>
+            <a href="/recipes/<%= recipe.id %>/add-information">Add missing information</a>
+        <% } %>
+
 
         <p><a href="/welcome">Back to recipes</a></p>
     </main>

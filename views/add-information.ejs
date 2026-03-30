@@ -1,0 +1,78 @@
+<%- include("headpartial.ejs") %>
+
+<main>
+    <h1>Dodaj informacje do przepisu: <%= recipe.name %></h1>
+    
+    <form id="recipe-form" action="/recipes/<%= recipe.id %>/add-information" method="POST">
+
+        <!-- ==================== SKŁADNIKI ==================== -->
+        <h2>Składniki</h2>
+        <div id="ingredients-container">
+            <!-- Pierwszy wiersz domyślny -->
+            <div class="dynamic-row ingredient-row" data-index="0">
+                <input type="text" name="ingredients[0][name]" placeholder="Nazwa składnika" required>
+                <input type="text" name="ingredients[0][amount]" placeholder="Ilość (np. 200g, 2 łyżki)">
+                <button type="button" class="remove-btn" onclick="removeRow(this)">Usuń</button>
+            </div>
+        </div>
+        <button type="button" onclick="addIngredient()" class="add-btn">+ Dodaj kolejny składnik</button>
+
+        <br><br>
+
+        <!-- ==================== INSTRUKCJE ==================== -->
+        <h2>Kroki wykonania</h2>
+        <div id="instructions-container">
+            <!-- Pierwszy wiersz domyślny -->
+            <div class="dynamic-row instruction-row">
+                <textarea name="instructions[]" placeholder="Opisz krok wykonania..." rows="3" required></textarea>
+                <button type="button" class="remove-btn" onclick="removeRow(this)">Usuń</button>
+            </div>
+        </div>
+        <button type="button" onclick="addInstruction()" class="add-btn">+ Dodaj kolejny krok</button>
+
+        <br><br>
+        <button type="submit" class="submit-btn">✅ Zapisz wszystkie składniki i instrukcje</button>
+    </form>
+</main>
+
+<script>
+    function addIngredient() {
+        const container = document.getElementById('ingredients-container');
+        const rows = container.querySelectorAll('.ingredient-row');
+        const nextIndex = rows.length;
+        const row = document.createElement('div');
+        row.className = 'dynamic-row ingredient-row';
+        row.dataset.index = nextIndex;
+        row.innerHTML = `
+            <input type="text" name="ingredients[${nextIndex}][name]" placeholder="Nazwa składnika" required>
+            <input type="text" name="ingredients[${nextIndex}][amount]" placeholder="Ilość (np. 200g, 2 łyżki)">
+            <button type="button" class="remove-btn" onclick="removeRow(this)">Usuń</button>
+        `;
+        container.appendChild(row);
+    }
+
+    function addInstruction() {
+        const container = document.getElementById('instructions-container');
+        const row = document.createElement('div');
+        row.className = 'dynamic-row instruction-row';
+        row.innerHTML = `
+            <textarea name="instructions[]" placeholder="Opisz krok wykonania..." rows="3" required></textarea>
+            <button type="button" class="remove-btn" onclick="removeRow(this)">Usuń</button>
+        `;
+        container.appendChild(row);
+    }
+
+    function removeRow(btn) {
+        btn.parentElement.remove();
+    }
+</script>
+
+<style>
+    .dynamic-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start; }
+    .dynamic-row input, .dynamic-row textarea { flex: 1; padding: 8px; }
+    .remove-btn { background: #e74c3c; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; }
+    .add-btn, .submit-btn { padding: 12px 20px; font-size: 1.05em; margin: 10px 0; }
+    .submit-btn { background: #27ae60; color: white; border: none; border-radius: 6px; }
+</style>
+
+<%- include("footpartial.ejs") %>
