@@ -49,10 +49,10 @@ const db_ops = {
         VALUES (?, ?)
     `),
     get_Recipes : db.prepare(`
-        SELECT id, name FROM recipes
+        SELECT id, name, user_email FROM recipes
     `),
     get_RecipesByUser : db.prepare(`
-        SELECT id, name FROM recipes 
+        SELECT id, name, user_email FROM recipes 
         WHERE user_email = ? 
         ORDER BY name
     `),

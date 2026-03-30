@@ -1,7 +1,7 @@
 import  express  from "express";
 import "dotenv/config";
 import bcrypt from "bcrypt";
-import { add_User, getUser, getAllUsers, add_Admin } from "./forms/user.js";
+import { add_User, getUser, getAllUsers, add_Admin, getUserId } from "./forms/user.js";
 import { 
     add_Ingredient,
     add_Instruction,
@@ -10,10 +10,10 @@ import {
     get_Recipes_By_User, 
     get_Recipe_Details,
     get_Recipe_For_Edit,
-    update_Recipe
+    update_Recipe,
 } from "./forms/recipies.js";
-import cookieParser from "cookie-parser";
-import settings from "./forms/settings.js";
+import session from "express-session";
+
 
 const port = process.env.PORT;
 const app = express();
@@ -21,41 +21,19 @@ const app = express();
 app.set("view engine", "ejs");
 app.set("views", "views");
 app.use(express.static("public"));
-app.use(cookieParser(settings.cookieSecret));
 app.use(express.urlencoded({ extended: true }));
 
-function loadUser(req, res, next) {
-    const userEmail = req.signedCookies.userEmail;
-    if (userEmail) {
-        const user = getUser(userEmail);
-        if (user) {
-            req.user = user;
-            res.locals.user = { email: user.email, role: user.role || "user" };
-        } else {
-            res.clearCookie("userEmail"); // invalid cookie
-        }
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false,
+        httpOnly: true,
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60 * 24 * 3
     }
-    next();
-}
-
-function settingsLocals (req, res, next) {
-    res.locals.app = settings.getAppSettings(req);
-    res.locals.page = req.path;
-    res.locals.user = res.locals.user || { email: "Guest", role: "user" };
-    res.locals.users = [];           
-    res.locals.recipes = [];
-    next();
-}
-
-app.use(loadUser);
-app.use(settingsLocals);
-
-const settingsRouter = express.Router();
-settingsRouter.get("/toggle-theme", settings.themeToggle);
-settingsRouter.get("/accept-cookies", settings.acceptCookies);
-settingsRouter.get("/decline-cookies", settings.declineCookies);
-settingsRouter.get("/manage-cookies", settings.manageCookies);
-app.use("/settings", settingsRouter);
+}));
 
 app.get("/privacy-policy", (req, res) => {
     res.render("privacy-policy", { title: "Privacy Policy" });
@@ -73,8 +51,13 @@ app.get("/add-recipe", (req, res) => {
     res.render("add-recipe", { title: "Add Recipe" });
 });
 
-app.get("/recipes/:id", (req, res) => {
+app.get("/recipes/:userEmail/:id", (req, res) => {
+    if (req.session.user.email != req.params.userEmail) {
+        return res.redirect("/login");
+    }
+
     const recipeId = req.params.id;
+    const userEmail = req.params.userEmail;
     const recipeDetails = get_Recipe_Details(recipeId);
 
     if (!recipeDetails || recipeDetails.length === 0) {
@@ -95,16 +78,18 @@ app.get("/recipes/:id", (req, res) => {
 
     return res.render("recipe", {
         title: recipeName,
-        recipe: { id: recipeId, name: recipeName, ingredients, instructions }
+        recipe: { id: recipeId, name: recipeName, ingredients, instructions },
+        userEmail: userEmail
     });
 });
 
-app.get("/recipes/:id/edit", (req, res) => {
-    if (!req.user || req.user.role !== "admin") {
+app.get("/recipes/:userEmail/:id/edit", (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
         return res.status(403).send("Only admin can edit recipes.");
     }
 
     const recipeId = parseInt(req.params.id);
+    const userEmail = req.params.userEmail;
     const recipe = get_Recipe_For_Edit(recipeId);
 
     if (!recipe) {
@@ -114,18 +99,22 @@ app.get("/recipes/:id/edit", (req, res) => {
     res.render("edit-recipe", { 
         title: `Edit Recipe: ${recipe.name}`,
         recipe: recipe,
-        user: req.user
+        userEmail: userEmail,
+        user: req.session.user
     });
 });
 
 app.get("/welcome", (req, res) => {
 if (req.user && req.user.role === "admin") {
+        const userRecipes = get_Recipes_By_User(req.user.email);
         const allUsers = getAllUsers();
+        const user_ID = getUserId(req.user.email);
         res.render("welcome", { 
             title: "Admin Panel – All Users",
             username: req.user.email,
             role: "admin",
             users: allUsers,
+            user_ID: user_ID,
             isAdmin: true,
             isAdminViewingUser: false,
             recipes: [],
@@ -135,6 +124,7 @@ if (req.user && req.user.role === "admin") {
         const recipes = get_Recipes();
         res.render("welcome", { 
             title: "Welcome", 
+            user_recipes: recipes.filter(r => r.user_email === req.user?.email),
             username: res.locals.user.email,
             role: res.locals.user.role,
             recipes: recipes,
@@ -171,7 +161,11 @@ app.get("/user/:email/recipes", (req, res) => {
     });
 });
 
-app.get("/recipes/:id/add-information", (req, res) => {
+app.get("/recipes/:userEmail/:id/add-information", (req, res) => {
+    if (req.session.user.email != req.params.userEmail) {
+        return res.redirect("/login");
+    }
+
     const recipeId = parseInt(req.params.id);
     const recipeDetails = get_Recipe_Details(recipeId);
 
@@ -186,12 +180,13 @@ app.get("/recipes/:id/add-information", (req, res) => {
 
     res.render("add-information", {
         title: `Add Information to ${recipe.name}`,
-        recipe: recipe
+        recipe: recipe,
+        userEmail: req.params.userEmail
     });
 });
 
 app.get("/logout", (req, res) => {
-    res.clearCookie("userEmail");
+    res.clearCookie("connect.sid", { path: "/" });
     res.redirect("/login");
 });
 
@@ -208,20 +203,19 @@ app.post("/signup", (req, res) => {
         const email = req.body.email;
         const passwordHash = bcrypt.hashSync(req.body.password, 10);
         add_Admin(email, passwordHash);
-        res.redirect("/login");
     }
     else {
         const email = req.body.email;
         const passwordHash = bcrypt.hashSync(req.body.password, 10);
 
         add_User(email, passwordHash);
-        res.redirect("/login");
     }
+    res.redirect("/login");
 });
 
 app.post("/login", (req, res) => { 
     const user = getUser(req.body.email);
-    const recipes = get_Recipes();
+    const recipes = get_Recipes_By_User(req.body.email);
 
     if (!user || !bcrypt.compareSync(req.body.password, user.passwordHash)) {
         return res.status(401).send("Invalid credentials");
@@ -229,54 +223,67 @@ app.post("/login", (req, res) => {
 
     const allUsers = user.role === "admin" ? getAllUsers() : [];
 
-    res.cookie("userEmail", user.email, { 
-    ...settings.CookieOptions, 
-    signed: true 
-    });
+    // === SESSION CREATION (secure way) ===
+    req.session.regenerate((err) => {
+        // prevents session fixation attack
+        if (err) {
+        console.error("Session regenerate error:", err);
+        return res.redirect("/welcome");
+        }
 
-    res.render("welcome", { 
-        title: "Welcome", 
-        username: user.email, 
-        role: user.role || "user",
-        recipes: recipes,
-        users: allUsers,
-        user: { email: user.email, role: user.role || "user" },
-        isAdmin: user.role === "admin",
-        isAdminViewingUser: false
+        req.session.user = {
+        email: user.email,
+        id: user.id,
+        role: user.role || "user"
+        };
+        console.log("User logged in successfully");
+
+        res.render("welcome", { 
+            title: "Welcome", 
+            username: user.email, 
+            role: user.role || "user",
+            recipes: recipes,
+            users: allUsers,
+            user: { email: user.email, role: user.role || "user" },
+            isAdmin: user.role === "admin",
+            isAdminViewingUser: false
+        });
     });
 });
 
 app.post("/add-recipe", (req, res) => {
-    if (!req.user) return res.redirect("/login");
+    if (!req.session.user) return res.redirect("/login");
 
     const name = req.body.name?.trim();
     if (!name) return res.status(400).send("Recipe name is required");
 
-    const recipeId = add_Recipe(name, req.user.email);   
+    const recipeId = add_Recipe(name, req.session.user.email);   
 
-    res.redirect(`/recipes/${recipeId}`);
+    res.redirect(`/recipes/${req.session.user.email}/${recipeId}`);
 });
 
-app.post("/recipes/:id/edit", (req, res) => {
-    if (!req.user || req.user.role !== "admin") {
+app.post("/recipes/:userEmail/:id/edit", (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
         return res.status(403).send("Access denied");
     }
 
     const recipeId = parseInt(req.params.id);
+    const userEmail = req.params.userEmail;
     const newName = req.body.name?.trim();
 
     if (!newName) {
         return res.status(400).send("Recipe name cannot be empty");
     }
 
-    update_Recipe(recipeId, newName, req.user.email);
-    res.redirect(`/recipes/${recipeId}`);
+    update_Recipe(recipeId, newName, req.session.user.email);
+    res.redirect(`/recipes/${userEmail}/${recipeId}`);
 });
 
-app.post("/recipes/:id/add-information", (req, res) => {
-    if (!req.user) return res.redirect("/login");
+app.post("/recipes/:userEmail/:id/add-information", (req, res) => {
+    if (!req.session.user) return res.redirect("/login");
 
     const recipeId = parseInt(req.params.id);
+    const userEmail = req.params.userEmail;
 
     // === SKŁADNIKI ===
     let ingredients = [];
@@ -319,7 +326,7 @@ app.post("/recipes/:id/add-information", (req, res) => {
         }
     });
 
-    res.redirect(`/recipes/${recipeId}`);
+    res.redirect(`/recipes/${userEmail}/${recipeId}`);
 });
 
 app.listen(port, () => {

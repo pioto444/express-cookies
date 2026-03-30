@@ -3,7 +3,7 @@
 <main>
     <h1>Dodaj informacje do przepisu: <%= recipe.name %></h1>
     
-    <form id="recipe-form" action="/recipes/<%= recipe.id %>/add-information" method="POST">
+    <form id="recipe-form" action="/recipes/<%= userEmail %>/<%= recipe.id %>/add-information" method="POST">
 
         <!-- ==================== SKŁADNIKI ==================== -->
         <h2>Składniki</h2>

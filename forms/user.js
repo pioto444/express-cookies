@@ -39,6 +39,9 @@ const db_ops = {
         SELECT id, email, role, created_at, last_login 
         FROM users 
         ORDER BY email ASC
+    `),
+    get_User_Id : db.prepare(`
+        SELECT id FROM users WHERE email = ?
     `)
 }
 
@@ -86,6 +89,11 @@ function getAllUsers() {
     return db_ops.get_All_Users.all();
 }
 
+function getUserId(email) {
+    const row = db_ops.get_User_Id.get(email);
+    return row ? row.id : null;
+}
+
 export { 
     add_User,
     delete_User,
@@ -93,5 +101,6 @@ export {
     getUser,
     getAdmin,
     add_Admin,
-    getAllUsers
+    getAllUsers,
+    getUserId
 };

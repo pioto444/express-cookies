@@ -28,7 +28,7 @@
 
         <% if (recipe.ingredients.length === 0 || recipe.instructions.length === 0) { %>
             <p><em>Note: This recipe is incomplete. Please consider adding missing ingredients or instructions.</em></p>
-            <a href="/recipes/<%= recipe.id %>/add-information">Add missing information</a>
+            <a href="/recipes/<%= userEmail %>/<%= recipe.id %>/add-information">Add missing information</a>
         <% } %>
 
 

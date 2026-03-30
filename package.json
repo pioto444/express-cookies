@@ -20,11 +20,10 @@
   "homepage": "https://github.com/pioto444/express-cookies#readme",
   "dependencies": {
     "bcrypt": "^6.0.0",
-    "cookie-parser": "^1.4.7",
     "dotenv": "^17.3.1",
     "ejs": "^5.0.1",
     "express": "^5.2.1",
-    "node": "^25.8.1",
-    "pug": "^3.0.4"
+    "express-session": "^1.19.0",
+    "node": "^25.8.1"
   }
 }

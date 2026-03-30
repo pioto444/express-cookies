@@ -4,12 +4,12 @@
     <h1>Edit Recipe</h1>
     <p><strong>Owner:</strong> <%= recipe.user_email || 'legacy' %></p>
 
-    <form action="/recipes/<%= recipe.id %>/edit" method="POST">
+    <form action="/recipes/<%= userEmail %>/<%= recipe.id %>/edit" method="POST">
         <label for="name">Recipe Name:</label><br>
         <input type="text" id="name" name="name" value="<%= recipe.name %>" required style="width: 400px; padding: 8px;"><br><br>
         
         <button type="submit">Save Changes</button>
-        <a href="/recipes/<%= recipe.id %>">Cancel</a>
+        <a href="/recipes/<%= userEmail %>/<%= recipe.id %>">Cancel</a>
     </form>
 
     <br>
