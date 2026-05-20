@@ -1,5 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
-import bcrypt from "bcrypt";
+import argon2 from "argon2";
 
 const db_path = "./recipes.sqlite";
 const db = new DatabaseSync(db_path);
@@ -55,7 +55,7 @@ function add_Admin(email, passwordHash) {
 }
 
 function add_User(email, password) {  
-        const passwordHash = typeof password === "string" && password.startsWith("$2") ? password : bcrypt.hashSync(password, 10);
+        const passwordHash = typeof password === "string" && password.startsWith("$2") ? password : argon2.hash(password);
         const createdAt = new Date().toISOString();
         const lastLogin = createdAt;
         const role = "user";
@@ -69,7 +69,7 @@ function delete_User(id) {
 }
 
 function update_User(id, email, password, lastLogin, role, isActive) {
-    const passwordHash = typeof password === "string" && password.startsWith("$2") ? password : bcrypt.hashSync(password, 10);
+    const passwordHash = typeof password === "string" && password.startsWith("$2") ? password : argon2.hash(password);
     db_ops.update_User.run(email, passwordHash, lastLogin, role, isActive, id);
 }
 
@@ -82,7 +82,7 @@ function getUser(email) {
 }
 
 function getAdmin(email, password) {
-    return (email === process.env.ADMIN_EMAIL) && bcrypt.compareSync(password, process.env.ADMIN_PASSWORD);
+    return (email === process.env.ADMIN_EMAIL) && argon2.verify(process.env.ADMIN_PASSWORD, password);
 }
 
 function getAllUsers() {

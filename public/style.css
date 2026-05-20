@@ -5,112 +5,160 @@
 }
 
 body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: linear-gradient(to bottom, #f8f4eb, #e8d9b8);
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
 }
 
+/* ===================== HEADER ===================== */
 header {
     display: flex;
-    flex-direction: row;
     justify-content: space-between;
-    background-color: rgb(32, 32, 132);
+    align-items: center;
+    background-color: rgb(32, 32, 132); /* Navy */
     color: white;
-    height: 10vh;
-    width: 100%;
+    padding: 0 5%;
+    height: 80px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .site-logo {
-    height: 90%;
-    width: 20%;
     display: flex;
-    flex-direction: row;
     align-items: center;
-    font-size: 30px;
-    font-family:'Courier New', Courier, monospace;
-}
-
-main {
-    height: 80vh;
-    width: 40%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color:#C3A456;
-    border-radius: 3%;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-
-article {
-    width: 100%;
-    height: 50%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-footer {
-    background-color: rgb(32, 32, 132);
-    height: 10vh;
-    width: 100%;
+    gap: 12px;
+    font-size: 28px;
+    font-weight: bold;
+    font-family: 'Courier New', Courier, monospace;
     color: white;
+    text-decoration: none;
+}
+
+.site-logo img {
+    height: 55px;
+    width: auto;
+    border-radius: 8px;
+}
+
+/* Navigation */
+nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: #C3A456; /* Gold hover */
+}
+
+/* ===================== MAIN ===================== */
+main {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 40px 20px;
+    background-color: #C3A456; /* Gold background */
+    position: relative;
+    overflow: hidden;
 }
 
-h1 {
-    margin-top: 20px;
-    margin-bottom: 10px;
-    padding: 5px;
-    width: 90%;
+.hero {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 60px 50px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    max-width: 620px;
     text-align: center;
+    border: 6px solid rgb(32, 32, 132);
 }
 
-h2 {
-    padding: 5px;
-    width: 80%;
-    text-align: center;
+.hero h1 {
+    font-size: 2.8rem;
+    margin-bottom: 16px;
+    color: rgb(32, 32, 132);
+    line-height: 1.1;
 }
 
+.hero h2 {
+    font-size: 1.4rem;
+    margin-bottom: 40px;
+    color: #444;
+    font-weight: 400;
+}
+
+/* Buttons */
 .navy-button {
-  width: 240px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;        
-  background-color: #000080;   
-  color: white;             
-  padding: 12px 24px;          
-  text-decoration: none;       
-  font-family: sans-serif;
-  font-weight: bold;
-  border-radius: 4px;          
-  transition: background 0.3s; 
-  font-size: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(32, 32, 132);
+    color: white;
+    padding: 16px 32px;
+    font-size: 1.3rem;
+    font-weight: bold;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    border: none;
+    cursor: pointer;
 }
 
 .navy-button:hover {
-  background-color: #000050;   
+    background-color: #000050;
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
-#cookie-popup {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background: #222;
-  color: #fff;
-  padding: 15px;
-  text-align: center;
-  display: none;
-  z-index: 1000;
+.navy-button.small {
+    padding: 10px 20px;
+    font-size: 1rem;
 }
 
-#cookie-popup button {
-  margin-left: 10px;
-  padding: 5px 10px;
-  cursor: pointer;
+/* ===================== FOOTER ===================== */
+footer {
+    background-color: rgb(32, 32, 132);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    font-size: 0.95rem;
+}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 768px) {
+    .hero {
+        padding: 40px 30px;
+        margin: 10px;
+    }
+    
+    .hero h1 {
+        font-size: 2.2rem;
+    }
+    
+    header {
+        padding: 0 5%;
+        height: 70px;
+    }
+    
+    .site-logo {
+        font-size: 24px;
+    }
+    
+    .site-logo img {
+        height: 45px;
+    }
 }

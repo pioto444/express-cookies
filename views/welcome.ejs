@@ -1,48 +1,69 @@
 <%- include("headpartial.ejs") %>
 
 <main>
-    <% if (isAdmin && !isAdminViewingUser) { %>
-        <!-- Admin widzi listę użytkowników -->
-        <h1>Admin Panel – All Users</h1>
-        <ul>
-            <% users.forEach(user => { %>
-                <li>
-                    <a href="/user/<%= user.email %>/recipes">
-                        <%= user.email %> 
-                        <small>(<%= user.role || 'user' %>)</small>
-                    </a>
-                </li>
-            <% }) %>
-        </ul>
+    <div class="content-container">
+        <% if (isAdmin && !isAdminViewingUser) { %>
+            <!-- Admin Panel -->
+            <div class="admin-notice">🔑 Admin Panel</div>
+            <h1>All Users</h1>
+            
+            <ul class="recipe-list">
+                <% users.forEach(user => { %>
+                    <li>
+                        <a href="/user/<%= user.email %>/recipes">
+                            <%= user.email %> 
+                            <small>(<%= user.role || 'user' %>)</small>
+                        </a>
+                    </li>
+                <% }) %>
+            </ul>
 
-    <% } else if (isAdmin && isAdminViewingUser) { %>
-        <!-- Admin przegląda przepisy wybranego użytkownika -->
-        <h1>Recipes of <%= viewedUserEmail %></h1>
-        <p><a href="/welcome">← Back to all users</a></p>
-        
-        <ul>
-            <% recipes.forEach(recipe => { %>
-                <li>
-                    <a href="/recipes/<%= recipe.user_email %>/<%= recipe.id %>"><%= recipe.name %></a>
-                        | <a href="/recipes/<%= recipe.user_email %>/<%= recipe.id %>/edit">Edit</a>
-                </li>
-            <% }) %>
-        </ul>
+        <% } else if (isAdmin && isAdminViewingUser) { %>
+            <!-- Admin viewing specific user -->
+            <h1>Recipes of <%= viewedUserEmail %></h1>
+            <p><a href="/welcome">← Back to all users</a></p>
+            
+            <ul class="recipe-list">
+                <% recipes.forEach(recipe => { %>
+                    <li>
+                        <a href="/recipes/<%= recipe.user_email %>/<%= recipe.id %>">
+                            <%= recipe.name %>
+                        </a>
+                        <span style="float:right;">
+                            <a href="/recipes/<%= recipe.user_email %>/<%= recipe.id %>/edit" style="margin-right:15px;">Edit</a>
+                        </span>
+                    </li>
+                <% }) %>
+            </ul>
 
-        <a href="/add-recipe">Add new recipe for <%= viewedUserEmail %></a>
+            <a href="/add-recipe" class="navy-button">Add New Recipe for <%= viewedUserEmail %></a>
 
-    <% } else { %>
-        <!-- Zwykły użytkownik -->
-        <h1>Welcome <%= username %></h1>
-        
-        <ul>
-            <% recipes.forEach(recipe => { %>
-                <li><a href="/recipes/<%= recipe.user_email %>/<%= recipe.id %>"><%= recipe.name %></a></li>
-            <% }) %>
-        </ul>
+        <% } else { %>
+            <!-- Regular User View -->
+            <h1>Welcome back, <%= username %> 👋</h1>
+            
+            <h2 style="text-align:center; margin: 20px 0; color:#555;">Your Recipes</h2>
+            
+            <% if (recipes.length === 0) { %>
+                <p style="text-align:center; color:#666; font-size:1.1rem;">
+                    You don't have any recipes yet.<br>
+                    Start creating your first one!
+                </p>
+            <% } else { %>
+                <ul class="recipe-list">
+                    <% recipes.forEach(recipe => { %>
+                        <li>
+                            <a href="/recipes/<%= recipe.user_email %>/<%= recipe.id %>">
+                                <%= recipe.name %>
+                            </a>
+                        </li>
+                    <% }) %>
+                </ul>
+            <% } %>
 
-        <a href="/add-recipe">Add Recipe</a>
-    <% } %>
+            <a href="/add-recipe" class="navy-button">+ Add New Recipe</a>
+        <% } %>
+    </div>
 </main>
 
 <%- include("footpartial.ejs") %>

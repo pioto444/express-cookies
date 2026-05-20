@@ -1,6 +1,6 @@
 import  express  from "express";
 import "dotenv/config";
-import bcrypt from "bcrypt";
+import argon2 from "argon2";
 import { add_User, getUser, getAllUsers, add_Admin, getUserId } from "./forms/user.js";
 import { 
     add_Ingredient,
@@ -192,6 +192,7 @@ app.get("/logout", (req, res) => {
 
 app.post("/signup", (req, res) => {
     const user = getUser(req.body.email);
+    const argon2 = require("argon2");
 
     if (req.body.password !== req.body.confirmPassword) {
         return res.status(400).send("Passwords do not match");  
@@ -201,12 +202,12 @@ app.post("/signup", (req, res) => {
     }
     else if (req.body.email === process.env.ADMIN_EMAIL && req.body.password === process.env.ADMIN_PASSWORD) {
         const email = req.body.email;
-        const passwordHash = bcrypt.hashSync(req.body.password, 10);
+        const passwordHash = argon2.hash(req.body.password);
         add_Admin(email, passwordHash);
     }
     else {
         const email = req.body.email;
-        const passwordHash = bcrypt.hashSync(req.body.password, 10);
+        const passwordHash = argon2.hash(req.body.password);
 
         add_User(email, passwordHash);
     }
@@ -216,8 +217,9 @@ app.post("/signup", (req, res) => {
 app.post("/login", (req, res) => { 
     const user = getUser(req.body.email);
     const recipes = get_Recipes_By_User(req.body.email);
+    const argon2 = require("argon2");
 
-    if (!user || !bcrypt.compareSync(req.body.password, user.passwordHash)) {
+    if (!user || !argon2.verify(user.passwordHash, req.body.password)) {
         return res.status(401).send("Invalid credentials");
     }
 

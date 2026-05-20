@@ -5,71 +5,173 @@
 }
 
 body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: linear-gradient(to bottom, #f8f4eb, #e8d9b8);
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
 }
 
+/* ===================== HEADER ===================== */
 header {
     display: flex;
-    flex-direction: row;
     justify-content: space-between;
-    background-color: rgb(32, 32, 132);
+    align-items: center;
+    background-color: rgb(32, 32, 132); /* Navy */
     color: white;
-    height: 10vh;
-    width: 100%;
+    padding: 0 5%;
+    height: 80px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .site-logo {
-    height: 90%;
-    width: 20%;
     display: flex;
-    flex-direction: row;
     align-items: center;
-    font-size: 30px;
-    font-family:'Courier New', Courier, monospace;
-}
-
-main {
-    height: 80vh;
-    width: 40%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color:#C3A456;
-    border-radius: 3%;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-
-footer {
-    background-color: rgb(32, 32, 132);
-    height: 10vh;
-    width: 100%;
+    gap: 12px;
+    font-size: 28px;
+    font-weight: bold;
+    font-family: 'Courier New', Courier, monospace;
     color: white;
+    text-decoration: none;
+}
+
+.site-logo img {
+    height: 55px;
+    width: auto;
+    border-radius: 8px;
+}
+
+nav {
     display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: #C3A456; /* Gold */
+}
+
+/* ===================== MAIN CONTENT ===================== */
+main {
+    flex: 1;
+    padding: 40px 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.content-container {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border: 6px solid rgb(32, 32, 132);
+}
+
+/* Headings */
+h1 {
+    color: rgb(32, 32, 132);
+    margin-bottom: 25px;
+    font-size: 2.4rem;
+    text-align: center;
+}
+
+/* Recipe List */
+.recipe-list {
+    list-style: none;
+}
+
+.recipe-list li {
+    background: #f9f5eb;
+    margin-bottom: 12px;
+    padding: 16px 20px;
+    border-radius: 10px;
+    border-left: 6px solid rgb(32, 32, 132);
+    transition: all 0.3s;
+}
+
+.recipe-list li:hover {
+    transform: translateX(8px);
+    background: #fff9e6;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.recipe-list a {
+    color: rgb(32, 32, 132);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.recipe-list a:hover {
+    color: #000050;
+}
+
+/* Buttons */
+.navy-button {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-}
-
-.navy-button {
-  width: 240px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;        
-  background-color: #000080;   
-  color: white;             
-  padding: 12px 24px;          
-  text-decoration: none;       
-  font-family: sans-serif;
-  font-weight: bold;
-  border-radius: 4px;          
-  transition: background 0.3s; 
-  font-size: 20px;
+    background-color: rgb(32, 32, 132);
+    color: white;
+    padding: 14px 28px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    border: none;
+    cursor: pointer;
+    margin: 15px 0;
 }
 
 .navy-button:hover {
-  background-color: #000050;   
+    background-color: #000050;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Admin specific */
+.admin-notice {
+    background: #ffe066;
+    color: #333;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* ===================== FOOTER ===================== */
+footer {
+    background-color: rgb(32, 32, 132);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin-top: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .content-container {
+        padding: 25px;
+        margin: 10px;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
 }
