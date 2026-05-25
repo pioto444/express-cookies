@@ -11,8 +11,8 @@
             <ul class="recipe-list">
                 <% users.forEach(user => { %>
                     <li>
-                        <a href="/user/<%= user.email %>/recipes">
-                            <%= user.email %> 
+                        <a href="/<%= user.id %>/recipes">
+                            <%= user.username %> 
                             <small>(<%= user.role || 'user' %>)</small>
                         </a>
                     </li>
@@ -27,11 +27,11 @@
             <ul class="recipe-list">
                 <% recipes.forEach(recipe => { %>
                     <li>
-                        <a href="/recipes/<%= recipe.user_email %>/<%= recipe.id %>">
+                        <a href="/recipes/<%= user_ID %>/<%= recipe.id %>">
                             <%= recipe.name %>
                         </a>
                         <span style="float:right;">
-                            <a href="/recipes/<%= recipe.user_email %>/<%= recipe.id %>/edit" style="margin-right:15px;">Edit</a>
+                            <a href="/recipes/<%= user_ID %>/<%= recipe.id %>/edit" style="margin-right:15px;">Edit</a>
                         </span>
                     </li>
                 <% }) %>
@@ -54,7 +54,7 @@
                 <ul class="recipe-list">
                     <% recipes.forEach(recipe => { %>
                         <li>
-                            <a href="/recipes/<%= recipe.user_email %>/<%= recipe.id %>">
+                            <a href="/recipes/<%= user_ID %>/<%= recipe.id %>">
                                 <%= recipe.name %>
                             </a>
                         </li>

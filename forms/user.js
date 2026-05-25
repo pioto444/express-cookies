@@ -8,6 +8,7 @@ db.exec(`
     CREATE TABLE IF NOT EXISTS users (
         id              INTEGER PRIMARY KEY AUTOINCREMENT,
         email           VARCHAR(100) UNIQUE,
+        username        VARCHAR(100) UNIQUE,
         password_hash   TEXT,
         created_at      TIMESTAMP,
         last_login      TIMESTAMP,
@@ -16,65 +17,71 @@ db.exec(`
     )`
 );
 
-const db_ops = {
-    add_User : db.prepare(`
-        INSERT INTO users (email, password_hash, created_at, last_login, role, is_active)
-        VALUES (?, ?, ?, ?, ?, ?)
-    `),
-    add_Admin : db.prepare(`
-        INSERT OR IGNORE INTO users (email, password_hash, created_at, last_login, role, is_active)
-        VALUES (?, ?, ?, ?, ?, ?)
-    `),
-    delete_User : db.prepare(`
+const userQueries = {
+    add_User : `
+        INSERT INTO users (email, username, password_hash, created_at, last_login, role, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `,
+    add_Admin : `
+        INSERT OR IGNORE INTO users (email, username, password_hash, created_at, last_login, role, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `,
+    delete_User : `
         DELETE FROM users WHERE id = ?
-    `),
-    update_User : db.prepare(`
-        UPDATE users SET email = ?, password_hash = ?, last_login = ?, role = ?, is_active = ?
+    `,
+    update_User : `
+        UPDATE users SET email = ?, username = ?, password_hash = ?, last_login = ?, role = ?, is_active = ?
         WHERE id = ?
-    `),
-    check_For_User : db.prepare(`
-        SELECT * FROM users WHERE email = ?
-    `),
-    get_All_Users : db.prepare(`
-        SELECT id, email, role, created_at, last_login 
+    `,
+    check_For_User : `
+        SELECT * FROM users WHERE email = ? OR username = ?
+    `,
+    get_All_Users : `
+        SELECT id, email, username, role, created_at, last_login 
         FROM users 
         ORDER BY email ASC
-    `),
-    get_User_Id : db.prepare(`
+    `,
+    get_User_Id : `
         SELECT id FROM users WHERE email = ?
-    `)
+    `,
+    get_UserById : `
+        SELECT id, email, username, password_hash, role, created_at, last_login 
+        FROM users 
+        WHERE id = ?
+    `
 }
 
-function add_Admin(email, passwordHash) {
+function add_Admin(email, username, passwordHash) {
     const createdAt = new Date().toISOString();
     const lastLogin = createdAt;
     const role = "admin";
     const isActive = 1;
 
-    db_ops.add_Admin.run(email, passwordHash, createdAt, lastLogin, role, isActive);
+    db.prepare(userQueries.add_Admin).run(email, username, passwordHash, createdAt, lastLogin, role, isActive);
 }
 
-function add_User(email, password) {  
-        const passwordHash = typeof password === "string" && password.startsWith("$2") ? password : argon2.hash(password);
-        const createdAt = new Date().toISOString();
-        const lastLogin = createdAt;
-        const role = "user";
-        const isActive = 1;
+async function add_User(email, username, password) {
+    const passwordHash = typeof password === "string" && password.startsWith("$argon2") ? password : await argon2.hash(password);
+    const createdAt = new Date().toISOString();
+    const lastLogin = createdAt;
+    const role = "user";
+    const isActive = 1;
 
-        db_ops.add_User.run(email, passwordHash, createdAt, lastLogin, role, isActive);
+    db.prepare(userQueries.add_User).run(email, username, passwordHash, createdAt, lastLogin, role, isActive);
 }
 
 function delete_User(id) {
-    db_ops.delete_User.run(id);
+    db.prepare(userQueries.delete_User).run(id);
 }
 
-function update_User(id, email, password, lastLogin, role, isActive) {
-    const passwordHash = typeof password === "string" && password.startsWith("$2") ? password : argon2.hash(password);
-    db_ops.update_User.run(email, passwordHash, lastLogin, role, isActive, id);
+async function update_User(id, email, username, password, lastLogin, role, isActive) {
+    const passwordHash = typeof password === "string" && password.startsWith("$argon2") ? password : await argon2.hash(password);
+    db.prepare(userQueries.update_User).run(email, username, passwordHash, lastLogin, role, isActive, id);
 }
 
-function getUser(email) {
-    const user =  db_ops.check_For_User.get(email);
+function getUser(identifier) {
+    if (!identifier) return null;
+    const user = db.prepare(userQueries.check_For_User).get(identifier, identifier);
     if (!user) return null;
 
     user.passwordHash = user.password_hash;
@@ -86,12 +93,16 @@ function getAdmin(email, password) {
 }
 
 function getAllUsers() {
-    return db_ops.get_All_Users.all();
+    return db.prepare(userQueries.get_All_Users).all();
 }
 
 function getUserId(email) {
-    const row = db_ops.get_User_Id.get(email);
+    const row = db.prepare(userQueries.get_User_Id).get(email);
     return row ? row.id : null;
+}
+
+function getUserById(id) {
+    return db.prepare(userQueries.get_UserById).get(id);
 }
 
 export { 
@@ -102,5 +113,6 @@ export {
     getAdmin,
     add_Admin,
     getAllUsers,
-    getUserId
+    getUserId,
+    getUserById
 };

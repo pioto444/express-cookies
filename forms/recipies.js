@@ -1,4 +1,3 @@
-import { get } from "node:http";
 import { DatabaseSync } from "node:sqlite";
 
 const db_path = "./recipes.sqlite";
@@ -7,6 +6,7 @@ const db = new DatabaseSync(db_path);
 db.exec(`
     CREATE TABLE IF NOT EXISTS recipes (
         id      INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         name    TEXT NOT NULL,
         user_email  VARCHAR(100) NOT NULL,   
         created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -35,77 +35,77 @@ db.exec(`
     );
 `);
 
-const db_ops = {
-    add_Ingredient : db.prepare(`
+const recipeQueries = {
+    add_Ingredient : `
         INSERT INTO ingredients (recipe_id, name, amount)
         VALUES (?, ?, ?)
-    `),
-    add_Instruction : db.prepare(`
+    `,
+    add_Instruction : `
         INSERT INTO instructions (recipe_id, instruction_num, instruction)
         VALUES (?, ?, ?)
-    `),
-    add_Recipe : db.prepare(`
-        INSERT INTO recipes (name, user_email)
-        VALUES (?, ?)
-    `),
-    get_Recipes : db.prepare(`
+    `,
+    add_Recipe : `
+        INSERT INTO recipes (name, user_id, user_email)
+        VALUES (?, ?, ?)
+    `,
+    get_Recipes : `
         SELECT id, name, user_email FROM recipes
-    `),
-    get_RecipesByUser : db.prepare(`
+    `,
+    get_RecipesByUserId : `
         SELECT id, name, user_email FROM recipes 
-        WHERE user_email = ? 
+        WHERE user_id = ? 
         ORDER BY name
-    `),
-    get_Recipe_Name : db.prepare(`
+    `,
+    get_Recipe_Name : `
         SELECT name FROM recipes WHERE id = ?
-    `),
-    get_Recipe_Ingredients : db.prepare(`
+    `,
+    get_Recipe_Ingredients : `
         SELECT name, amount FROM ingredients WHERE recipe_id = ?
-    `),
-    get_Recipe_Instructions : db.prepare(`
+    `,
+    get_Recipe_Instructions : `
         SELECT instruction_num, instruction FROM instructions WHERE recipe_id = ?
         ORDER BY instruction_num
-    `),
-    get_Recipe_For_Edit : db.prepare(`
+    `,
+    get_Recipe_For_Edit : `
         SELECT id, name, user_email 
         FROM recipes 
         WHERE id = ?
-    `),
-    update_Recipe : db.prepare(`
+    `,
+    update_Recipe : `
         UPDATE recipes 
         SET name = ? 
         WHERE id = ?
-    `)
+    `
 };
 
 function add_Ingredient(recipeId, name, amount) {
-    db_ops.add_Ingredient.run(recipeId, name, amount || null);
+    db.prepare(recipeQueries.add_Ingredient).run(recipeId, name, amount || null);
 }
 
 function add_Instruction(recipeId, instructionNum, instruction) {
-    db_ops.add_Instruction.run(recipeId, instructionNum, instruction);
+    db.prepare(recipeQueries.add_Instruction).run(recipeId, instructionNum, instruction);
 }
 
-function add_Recipe(name, userEmail) {
-if (!userEmail) throw new Error("userEmail is required when adding recipe");
-    const result = db_ops.add_Recipe.run(name, userEmail);
+function add_Recipe(name, userId, userEmail) {
+    if (!userEmail) throw new Error("userEmail is required when adding recipe");
+    const result = db.prepare(recipeQueries.add_Recipe).run(name, userId, userEmail);
     return result.lastInsertRowid;
 }
 
 function get_Recipes() {
-    return db_ops.get_Recipes.all();
+    return db.prepare(recipeQueries.get_Recipes).all();
 }
 
-function get_Recipes_By_User(email) {
-    return db_ops.get_RecipesByUser.all(email);
+function get_Recipes_By_User_ID(user_ID) {
+    return db.prepare(recipeQueries.get_RecipesByUserId).all(user_ID);
 }
 
 function get_Recipe_Details(recipeId) {
-    const recipeRow = db_ops.get_Recipe_Name.get(recipeId);
+    const recipeRow = db.prepare(recipeQueries.get_Recipe_Name).get(recipeId);
     if (!recipeRow) return [];
     
-    const ingredients = db_ops.get_Recipe_Ingredients.all(recipeId);
-    const instructions = db_ops.get_Recipe_Instructions.all(recipeId);
+    const ingredients = db.prepare(recipeQueries.get_Recipe_Ingredients).all(recipeId);
+    const instructions = db.prepare(recipeQueries.get_Recipe_Instructions).all(recipeId);
     
     // Return combined result in the original format for backward compatibility
     const result = [];
@@ -131,11 +131,11 @@ function get_Recipe_Details(recipeId) {
 }
 
 function get_Recipe_For_Edit(recipeId) {
-    return db_ops.get_Recipe_For_Edit.get(recipeId);
+    return db.prepare(recipeQueries.get_Recipe_For_Edit).get(recipeId);
 }
 
 function update_Recipe(recipeId, name) {
-    db_ops.update_Recipe.run(name, recipeId);
+    db.prepare(recipeQueries.update_Recipe).run(name, recipeId);
 }
 
 export { 
@@ -143,7 +143,7 @@ export {
     add_Instruction,
     add_Recipe,
     get_Recipes,
-    get_Recipes_By_User,
+    get_Recipes_By_User_ID,
     get_Recipe_Details,
     get_Recipe_For_Edit,
     update_Recipe

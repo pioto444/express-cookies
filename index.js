@@ -1,13 +1,13 @@
 import  express  from "express";
 import "dotenv/config";
 import argon2 from "argon2";
-import { add_User, getUser, getAllUsers, add_Admin, getUserId } from "./forms/user.js";
+import { add_User, getUser, getAllUsers, add_Admin, getUserId, getUserById } from "./forms/user.js";
 import { 
     add_Ingredient,
     add_Instruction,
     add_Recipe, 
     get_Recipes, 
-    get_Recipes_By_User, 
+    get_Recipes_By_User_ID, 
     get_Recipe_Details,
     get_Recipe_For_Edit,
     update_Recipe,
@@ -35,24 +35,58 @@ app.use(session({
     }
 }));
 
-app.get("/privacy-policy", (req, res) => {
-    res.render("privacy-policy", { title: "Privacy Policy" });
-});
-
 app.get("/login", (req, res) => {
     res.render("login", { title: "Login" });
-});
+}); 
 
 app.get("/signup", (req, res) => {
     res.render("signup", { title: "Sign up" });
 });
 
+app.post("/signup", async (req, res) => {
+    const user = getUser(req.body.email || req.body.username);
+
+    if (req.body.password !== req.body.confirmPassword) {
+        return res.status(400).send("Passwords do not match");  
+    }
+    else if (user) {
+        return res.status(400).send("User already exists");
+    }
+    else if (req.body.email === process.env.ADMIN_EMAIL && req.body.password === process.env.ADMIN_PASSWORD) {
+        const email = req.body.email;
+        const username = req.body.username;
+        const passwordHash = await argon2.hash(req.body.password);
+        add_Admin(email, username, passwordHash);
+    }
+    else {
+        const email = req.body.email;
+        const username = req.body.username;
+        const passwordHash = await argon2.hash(req.body.password);
+
+        await add_User(email, username, passwordHash);
+    }
+    res.redirect("/login");
+});
+
+
 app.get("/add-recipe", (req, res) => {
     res.render("add-recipe", { title: "Add Recipe" });
 });
 
-app.get("/recipes/:userEmail/:id", (req, res) => {
-    if (req.session.user.email != req.params.userEmail) {
+app.post("/add-recipe", (req, res) => {
+    if (!req.session.user) return res.redirect("/login");
+
+    const name = req.body.name?.trim();
+    if (!name) return res.status(400).send("Recipe name is required");
+
+    const recipeId = add_Recipe(name, req.session.user.id, req.session.user.email);
+    const userID = getUserId(req.session.user.email);
+
+    res.redirect(`/recipes/${userID}/${recipeId}`);
+});
+
+app.get("/recipes/:userID/:id", (req, res) => {
+    if (req.session.user.id != req.params.userID) {
         return res.redirect("/login");
     }
 
@@ -105,10 +139,11 @@ app.get("/recipes/:userEmail/:id/edit", (req, res) => {
 });
 
 app.get("/welcome", (req, res) => {
-if (req.session.user && req.session.user.role === "admin") {
-        const userRecipes = get_Recipes_By_User(req.session.user.email);
+    if (req.session.user && req.session.user.role === "admin") {
+        const userRecipes = get_Recipes_By_User_ID(req.session.user.id);
         const allUsers = getAllUsers();
-        const user_ID = getUserId(req.session.user.email);
+        const user_ID = req.session.user.id;
+
         res.render("welcome", { 
             title: "Admin Panel – All Users",
             username: req.session.user.email,
@@ -121,11 +156,17 @@ if (req.session.user && req.session.user.role === "admin") {
             viewedUserEmail: null
         });
     } else {
-        const recipes = get_Recipes();
+        const user_ID = req.session.user.id;
+        console.log("User ID in /welcome route:", user_ID);
+
+        console.log(recipes);
+        
+        const recipes = get_Recipes_By_User_ID(user_ID);
         res.render("welcome", { 
             title: "Welcome", 
-            user_recipes: recipes.filter(r => r.user_email === req.session.user?.email),
+            user_recipes: recipes.filter(r => r.user_ID === req.session.user.id),
             username: req.session.user.email,
+            user_ID: user_ID,
             role: req.session.user.role,
             recipes: recipes,
             isAdmin: false,
@@ -135,34 +176,79 @@ if (req.session.user && req.session.user.role === "admin") {
     }
 });
 
-app.get("/user/:email/recipes", (req, res) => {
+app.post("/welcome", async (req, res) => { 
+    const user = getUser(req.body.email || req.body.username);
+    const validPassword = user ? await argon2.verify(user.passwordHash, req.body.password) : false;
+
+    if (!user || !validPassword) {
+        return res.status(401).send("Invalid credentials");
+    }
+
+    const allUsers = user.role === "admin" ? getAllUsers() : [];
+
+    // === SESSION CREATION (secure way) ===
+    req.session.regenerate((err) => {
+        // prevents session fixation attack
+        if (err) {
+        console.error("Session regenerate error:", err);
+        return res.redirect("/welcome");
+        }
+
+        req.session.user = {
+        email: user.email,
+        username: user.username,
+        id: user.id,
+        role: user.role || "user"
+        };
+        console.log("User logged in successfully");
+
+        const recipes = get_Recipes_By_User_ID(req.session.user.id);
+        const user_ID = req.session.user.id;
+
+        res.render("welcome", { 
+            title: "Welcome", 
+            username: user.username, 
+            email: user.email,
+            role: user.role || "user",
+            recipes: recipes,
+            users: allUsers,
+            user: { email: user.email, username: user.username, role: user.role || "user" },
+            user_ID: user_ID,
+            isAdmin: user.role === "admin",
+            isAdminViewingUser: false
+        });
+    });
+});
+
+app.get("/:userID/recipes", (req, res) => {
     if (!req.session.user || req.session.user.role !== "admin") {
         return res.status(403).send("Access denied. Only admin can view other users' recipes.");
     }
 
-    const targetEmail = req.params.email;
-    const targetUser = getUser(targetEmail);
+    const targetUserID = parseInt(req.params.userID);
+    const targetUser = getUserById(targetUserID);
 
     if (!targetUser) {
         return res.status(404).send("User not found");
     }
 
-    const recipes = get_Recipes_By_User(targetEmail);
+    const recipes = get_Recipes_By_User_ID(targetUserID);
 
     res.render("welcome", { 
-        title: `Recipes of ${targetEmail}`,
-        username: targetEmail,
+        title: `Recipes of ${targetUser.email}`,
+        username: targetUser.email,
         role: "admin",
         recipes: recipes,
         isAdmin: true,
         isAdminViewingUser: true,
-        viewedUserEmail: targetEmail,
-        users: []
+        viewedUserEmail: targetUser.email,
+        users: [],
+        user_ID: targetUserID
     });
 });
 
-app.get("/recipes/:userEmail/:id/add-information", (req, res) => {
-    if (req.session.user.email != req.params.userEmail) {
+app.get("/recipes/:userID/:id/add-information", (req, res) => {
+    if (req.session.user.id != req.params.userID) {
         return res.redirect("/login");
     }
 
@@ -181,7 +267,7 @@ app.get("/recipes/:userEmail/:id/add-information", (req, res) => {
     res.render("add-information", {
         title: `Add Information to ${recipe.name}`,
         recipe: recipe,
-        userEmail: req.params.userEmail
+        userID: req.params.userID
     });
 });
 
@@ -190,84 +276,7 @@ app.get("/logout", (req, res) => {
     res.redirect("/login");
 });
 
-app.post("/signup", (req, res) => {
-    const user = getUser(req.body.email);
-
-    if (req.body.password !== req.body.confirmPassword) {
-        return res.status(400).send("Passwords do not match");  
-    }
-    else if (user) {
-        return res.status(400).send("User already exists");
-    }
-    else if (req.body.email === process.env.ADMIN_EMAIL && req.body.password === process.env.ADMIN_PASSWORD) {
-        const email = req.body.email;
-        const passwordHash = argon2.hash(req.body.password);
-        add_Admin(email, passwordHash);
-    }
-    else {
-        const email = req.body.email;
-        const passwordHash = argon2.hash(req.body.password);
-
-        add_User(email, passwordHash);
-    }
-    res.redirect("/login");
-});
-
-app.post("/login", (req, res) => { 
-    const user = getUser(req.body.email);
-    const recipes = get_Recipes_By_User(req.body.email);
-
-    console.log("Login attempt for:", req.body.email);
-    console.log("User found:", !!user);
-    console.log("Password provided:", req.body.password);
-    console.log("user role:", user?.role);
-
-    if (!user || !argon2.verify(user.passwordHash, req.body.password)) {
-        return res.status(401).send("Invalid credentials");
-    }
-
-    const allUsers = user.role === "admin" ? getAllUsers() : [];
-
-    // === SESSION CREATION (secure way) ===
-    req.session.regenerate((err) => {
-        // prevents session fixation attack
-        if (err) {
-        console.error("Session regenerate error:", err);
-        return res.redirect("/welcome");
-        }
-
-        req.session.user = {
-        email: user.email,
-        id: user.id,
-        role: user.role || "user"
-        };
-        console.log("User logged in successfully");
-
-        res.render("welcome", { 
-            title: "Welcome", 
-            username: user.email, 
-            role: user.role || "user",
-            recipes: recipes,
-            users: allUsers,
-            user: { email: user.email, role: user.role || "user" },
-            isAdmin: user.role === "admin",
-            isAdminViewingUser: false
-        });
-    });
-});
-
-app.post("/add-recipe", (req, res) => {
-    if (!req.session.user) return res.redirect("/login");
-
-    const name = req.body.name?.trim();
-    if (!name) return res.status(400).send("Recipe name is required");
-
-    const recipeId = add_Recipe(name, req.session.user.email);   
-
-    res.redirect(`/recipes/${req.session.user.email}/${recipeId}`);
-});
-
-app.post("/recipes/:userEmail/:id/edit", (req, res) => {
+app.post("/recipes/:userID/:id/edit", (req, res) => {
     if (!req.session.user || req.session.user.role !== "admin") {
         return res.status(403).send("Access denied");
     }
@@ -284,7 +293,7 @@ app.post("/recipes/:userEmail/:id/edit", (req, res) => {
     res.redirect(`/recipes/${userEmail}/${recipeId}`);
 });
 
-app.post("/recipes/:userEmail/:id/add-information", (req, res) => {
+app.post("/recipes/:userID/:id/add-information", (req, res) => {
     if (!req.session.user) return res.redirect("/login");
 
     const recipeId = parseInt(req.params.id);
