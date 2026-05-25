@@ -105,13 +105,13 @@ app.get("/recipes/:userEmail/:id/edit", (req, res) => {
 });
 
 app.get("/welcome", (req, res) => {
-if (req.user && req.user.role === "admin") {
-        const userRecipes = get_Recipes_By_User(req.user.email);
+if (req.session.user && req.session.user.role === "admin") {
+        const userRecipes = get_Recipes_By_User(req.session.user.email);
         const allUsers = getAllUsers();
-        const user_ID = getUserId(req.user.email);
+        const user_ID = getUserId(req.session.user.email);
         res.render("welcome", { 
             title: "Admin Panel – All Users",
-            username: req.user.email,
+            username: req.session.user.email,
             role: "admin",
             users: allUsers,
             user_ID: user_ID,
@@ -124,9 +124,9 @@ if (req.user && req.user.role === "admin") {
         const recipes = get_Recipes();
         res.render("welcome", { 
             title: "Welcome", 
-            user_recipes: recipes.filter(r => r.user_email === req.user?.email),
-            username: res.locals.user.email,
-            role: res.locals.user.role,
+            user_recipes: recipes.filter(r => r.user_email === req.session.user?.email),
+            username: req.session.user.email,
+            role: req.session.user.role,
             recipes: recipes,
             isAdmin: false,
             isAdminViewingUser: null,
@@ -136,7 +136,7 @@ if (req.user && req.user.role === "admin") {
 });
 
 app.get("/user/:email/recipes", (req, res) => {
-    if (!req.user || req.user.role !== "admin") {
+    if (!req.session.user || req.session.user.role !== "admin") {
         return res.status(403).send("Access denied. Only admin can view other users' recipes.");
     }
 
@@ -192,7 +192,6 @@ app.get("/logout", (req, res) => {
 
 app.post("/signup", (req, res) => {
     const user = getUser(req.body.email);
-    const argon2 = require("argon2");
 
     if (req.body.password !== req.body.confirmPassword) {
         return res.status(400).send("Passwords do not match");  
@@ -217,7 +216,11 @@ app.post("/signup", (req, res) => {
 app.post("/login", (req, res) => { 
     const user = getUser(req.body.email);
     const recipes = get_Recipes_By_User(req.body.email);
-    const argon2 = require("argon2");
+
+    console.log("Login attempt for:", req.body.email);
+    console.log("User found:", !!user);
+    console.log("Password provided:", req.body.password);
+    console.log("user role:", user?.role);
 
     if (!user || !argon2.verify(user.passwordHash, req.body.password)) {
         return res.status(401).send("Invalid credentials");
