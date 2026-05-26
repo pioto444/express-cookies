@@ -134,7 +134,7 @@ function get_Recipe_For_Edit(recipeId) {
     return db.prepare(recipeQueries.get_Recipe_For_Edit).get(recipeId);
 }
 
-function update_Recipe(recipeId, name) {
+function update_Recipe(name, recipeId) {
     db.prepare(recipeQueries.update_Recipe).run(name, recipeId);
 }
 

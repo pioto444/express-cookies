@@ -2,7 +2,7 @@
 
     <main>
         <h1>Add Recipe</h1>
-        <form action="/add-recipe" method="POST">
+        <form action="/add-recipe/<%= userID %>" method="POST">
             <label for="name">Recipe Name:</label>
             <input type="text" id="name" name="name" required>
             <br>

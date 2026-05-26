@@ -4,16 +4,16 @@
     <h1>Edit Recipe</h1>
     <p><strong>Owner:</strong> <%= recipe.user_email || 'legacy' %></p>
 
-    <form action="/recipes/<%= userID %>/<%= recipe.id %>/edit" method="POST">
+    <form action="/<%= userID %>/<%= recipeId %>/recipe" method="POST">
         <label for="name">Recipe Name:</label><br>
         <input type="text" id="name" name="name" value="<%= recipe.name %>" required style="width: 400px; padding: 8px;"><br><br>
         
         <button type="submit">Save Changes</button>
-        <a href="/recipes/<%= userID %>/<%= recipe.id %>">Cancel</a>
+        <a href="/<%= userID %>/recipes">Cancel</a>
     </form>
 
     <br>
-    <a href="/<%= userID %>/recipes">← Back to Admin Panel</a>
+    <a href="/welcome">← Back to Admin Panel</a>
 </main>
 
 <%- include("footpartial.ejs") %>

@@ -68,21 +68,23 @@ app.post("/signup", async (req, res) => {
     res.redirect("/login");
 });
 
-
-app.get("/add-recipe", (req, res) => {
-    res.render("add-recipe", { title: "Add Recipe" });
+app.get("/add-recipe/:userID", (req, res) => {
+    res.render("add-recipe", { title: "Add Recipe", userID: req.params.userID });
 });
 
-app.post("/add-recipe", (req, res) => {
+app.post("/add-recipe/:userID", (req, res) => {
     if (!req.session.user) return res.redirect("/login");
 
     const name = req.body.name?.trim();
     if (!name) return res.status(400).send("Recipe name is required");
 
     const recipeId = add_Recipe(name, req.session.user.id, req.session.user.email);
-    const userID = getUserId(req.session.user.email);
+    const userID = req.params.userID;
+    const userEmail = getUserById(userID)?.email || "unknown";
 
-    res.redirect(`/recipes/${userID}/${recipeId}`);
+    add_Recipe(name, userID, userEmail);
+
+    res.redirect(`/${userID}/recipes`);
 });
 
 app.get("/recipes/:userID/:id", (req, res) => {
@@ -122,9 +124,9 @@ app.get("/recipes/:userID/:id/edit", (req, res) => {
         return res.status(403).send("Only admin can edit recipes.");
     }
 
-    const recipeId = parseInt(req.params.id);
+    const recipeId = req.params.id;
     const userEmail = req.params.userEmail;
-    const userID = parseInt(req.params.userID);
+    const userID = req.params.userID;
     const recipe = get_Recipe_For_Edit(recipeId);
 
     if (!recipe) {
@@ -133,6 +135,7 @@ app.get("/recipes/:userID/:id/edit", (req, res) => {
 
     res.render("edit-recipe", { 
         title: `Edit Recipe: ${recipe.name}`,
+        recipeId: recipeId,
         recipe: recipe,
         userEmail: userEmail,
         userID: userID,
@@ -244,9 +247,27 @@ app.get("/:userID/recipes", (req, res) => {
         isAdmin: true,
         isAdminViewingUser: true,
         viewedUserEmail: targetUser.email,
+        viewedUserID: targetUserID,
         users: [],
         user_ID: targetUserID
     });
+});
+
+app.post("/:userID/:id/recipe", (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
+        return res.status(403).send("Access denied");
+    }
+
+    
+    const recipeId = req.params.id;
+    const newName = req.body.name?.trim();
+
+    if (!newName) {
+        return res.status(400).send("Recipe name cannot be empty");
+    }
+
+    update_Recipe(newName, recipeId);
+    res.redirect(`/welcome`);
 });
 
 app.get("/recipes/:userID/:id/add-information", (req, res) => {
@@ -271,28 +292,6 @@ app.get("/recipes/:userID/:id/add-information", (req, res) => {
         recipe: recipe,
         userID: req.params.userID
     });
-});
-
-app.get("/logout", (req, res) => {
-    res.clearCookie("connect.sid", { path: "/" });
-    res.redirect("/login");
-});
-
-app.post("/recipes/:userID/:id/edit", (req, res) => {
-    if (!req.session.user || req.session.user.role !== "admin") {
-        return res.status(403).send("Access denied");
-    }
-
-    const recipeId = parseInt(req.params.id);
-    const userID = parseInt(req.params.userID);
-    const newName = req.body.name?.trim();
-
-    if (!newName) {
-        return res.status(400).send("Recipe name cannot be empty");
-    }
-
-    update_Recipe(recipeId, newName, req.session.user.email);
-    res.redirect(`/recipes/${userID}/${recipeId}`);
 });
 
 app.post("/recipes/:userID/:id/add-information", (req, res) => {
@@ -343,6 +342,11 @@ app.post("/recipes/:userID/:id/add-information", (req, res) => {
     });
 
     res.redirect(`/recipes/${userEmail}/${recipeId}`);
+});
+
+app.get("/logout", (req, res) => {
+    res.clearCookie("connect.sid", { path: "/" });
+    res.redirect("/login");
 });
 
 app.listen(port, () => {

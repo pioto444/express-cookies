@@ -37,7 +37,7 @@
                 <% }) %>
             </ul>
 
-            <a href="/add-recipe" class="navy-button">Add New Recipe for <%= viewedUserEmail %></a>
+            <a href="/add-recipe/<%= viewedUserID %>" class="navy-button">Add New Recipe for <%= viewedUserEmail %></a>
 
         <% } else { %>
             <!-- Regular User View -->
@@ -62,7 +62,7 @@
                 </ul>
             <% } %>
 
-            <a href="/add-recipe" class="navy-button">+ Add New Recipe</a>
+            <a href="/add-recipe/<%= user_ID %>" class="navy-button">+ Add New Recipe</a>
         <% } %>
     </div>
 </main>
