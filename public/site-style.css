@@ -8,7 +8,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: #333;
-    background: linear-gradient(to bottom, #f8f4eb, #e8d9b8);
+    background: linear-gradient(to bottom, #f8f4eb, #C3A456);
     min-height: 100vh;
     display: flex;
     flex-direction: column;

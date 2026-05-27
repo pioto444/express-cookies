@@ -31,13 +31,14 @@
                             <%= recipe.name %>
                         </a>
                         <span style="float:right;">
+                            <a href="/recipes/<%= user_ID %>/<%= recipe.id %>/delete" style="margin-right:15px;">Delete</a>
                             <a href="/recipes/<%= user_ID %>/<%= recipe.id %>/edit" style="margin-right:15px;">Edit</a>
                         </span>
                     </li>
                 <% }) %>
             </ul>
 
-            <a href="/add-recipe/<%= viewedUserID %>" class="navy-button">Add New Recipe for <%= viewedUserEmail %></a>
+            <a href="/add-recipe-for-user/<%= viewedUserID %>" class="navy-button">Add New Recipe for <%= viewedUserEmail %></a>
 
         <% } else { %>
             <!-- Regular User View -->
@@ -57,6 +58,9 @@
                             <a href="/recipes/<%= user_ID %>/<%= recipe.id %>">
                                 <%= recipe.name %>
                             </a>
+                            <span style="float:right;">
+                                <a href="/recipes/<%= user_ID %>/<%= recipe.id %>/delete" style="margin-right:15px;">Delete</a>
+                            </span>
                         </li>
                     <% }) %>
                 </ul>

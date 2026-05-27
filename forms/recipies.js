@@ -75,6 +75,9 @@ const recipeQueries = {
         UPDATE recipes 
         SET name = ? 
         WHERE id = ?
+    `,
+    delete_Recipe : `
+        DELETE FROM recipes WHERE id = ?
     `
 };
 
@@ -138,6 +141,10 @@ function update_Recipe(name, recipeId) {
     db.prepare(recipeQueries.update_Recipe).run(name, recipeId);
 }
 
+function delete_Recipe(recipeId) {
+    db.prepare(recipeQueries.delete_Recipe).run(recipeId);
+}
+
 export { 
     add_Ingredient,
     add_Instruction,
@@ -146,5 +153,6 @@ export {
     get_Recipes_By_User_ID,
     get_Recipe_Details,
     get_Recipe_For_Edit,
-    update_Recipe
+    update_Recipe,
+    delete_Recipe
 };
