@@ -8,7 +8,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: #333;
-    background: linear-gradient(to bottom, #f8f4eb, #e8d9b8);
+    background: linear-gradient(to bottom, #f8f4eb, #C3A456);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -46,11 +46,10 @@ header {
     border-radius: 8px;
 }
 
-/* Navigation */
 nav {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 25px;
 }
 
 nav a {
@@ -61,43 +60,200 @@ nav a {
 }
 
 nav a:hover {
-    color: #C3A456; /* Gold hover */
+    color: #C3A456; /* Gold */
 }
 
-/* ===================== MAIN ===================== */
+/* ===================== MAIN CONTENT ===================== */
 main {
     flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     padding: 40px 20px;
-    background-color: #C3A456; /* Gold background */
-    position: relative;
-    overflow: hidden;
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
 }
 
+/* Hero for index.html */
 .hero {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 60px 50px;
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    max-width: 620px;
+    background: #d1a840;
     text-align: center;
-    border: 6px solid rgb(32, 32, 132);
+    padding: 80px 20px;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .hero h1 {
-    font-size: 2.8rem;
-    margin-bottom: 16px;
     color: rgb(32, 32, 132);
-    line-height: 1.1;
+    font-size: 2.8rem;
+    margin-bottom: 20px;
+    line-height: 1.2;
 }
 
 .hero h2 {
+    color: #444;
     font-size: 1.4rem;
     margin-bottom: 40px;
-    color: #444;
-    font-weight: 400;
+    font-weight: 500;
+}
+
+/* Content Container for welcome.ejs */
+.content-container {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border: 6px solid rgb(32, 32, 132);
+}
+
+/* General Headings */
+h1 {
+    color: rgb(32, 32, 132);
+    margin-bottom: 25px;
+    font-size: 2.4rem;
+    text-align: center;
+}
+
+h2 {
+    color: rgb(32, 32, 132);
+    margin: 30px 0 15px 0;
+    font-size: 1.8rem;
+    border-bottom: 3px solid #C3A456;
+    padding-bottom: 8px;
+}
+
+/* Recipe View (recipe.ejs) */
+.recipe-list {
+    list-style: none;
+}
+
+.recipe-list li {
+    background: #f9f5eb;
+    margin-bottom: 12px;
+    padding: 16px 20px;
+    border-radius: 10px;
+    border-left: 6px solid rgb(32, 32, 132);
+    transition: all 0.3s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.recipe-list li:hover {
+    transform: translateX(8px);
+    background: #fff9e6;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.recipe-list a {
+    color: rgb(32, 32, 132);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.recipe-list a:hover {
+    color: #000050;
+}
+
+/* Ingredients & Instructions Lists */
+ul, ol {
+    background: #f9f5eb;
+    padding: 20px 25px;
+    border-radius: 12px;
+    border-left: 6px solid rgb(32, 32, 132);
+    margin-bottom: 25px;
+}
+
+ul li, ol li {
+    margin-bottom: 10px;
+    padding-left: 8px;
+}
+
+ul {
+    list-style-type: disc;
+}
+
+ol {
+    list-style-type: decimal;
+}
+
+/* Form Styles for add-information.ejs */
+.dynamic-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    align-items: flex-start;
+}
+
+.dynamic-row input,
+.dynamic-row textarea {
+    flex: 1;
+    padding: 12px 14px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border 0.3s;
+}
+
+.dynamic-row input:focus,
+.dynamic-row textarea:focus {
+    border-color: rgb(32, 32, 132);
+    outline: none;
+}
+
+.remove-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.remove-btn:hover {
+    background: #c0392b;
+}
+
+.add-btn {
+    background-color: rgb(32, 32, 132);
+    color: white;
+    padding: 12px 24px;
+    font-size: 1.05em;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 10px 0 20px 0;
+    transition: all 0.3s;
+}
+
+.add-btn:hover {
+    background-color: #000050;
+    transform: translateY(-2px);
+}
+
+.submit-btn {
+    background: #27ae60;
+    color: white;
+    padding: 16px 32px;
+    font-size: 1.2em;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 400px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    transition: all 0.3s;
+}
+
+.submit-btn:hover {
+    background: #219653;
+    transform: translateY(-3px);
 }
 
 /* Buttons */
@@ -107,8 +263,8 @@ main {
     justify-content: center;
     background-color: rgb(32, 32, 132);
     color: white;
-    padding: 16px 32px;
-    font-size: 1.3rem;
+    padding: 14px 28px;
+    font-size: 1.1rem;
     font-weight: bold;
     border-radius: 8px;
     text-decoration: none;
@@ -116,49 +272,76 @@ main {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     border: none;
     cursor: pointer;
+    margin: 15px 0;
 }
 
 .navy-button:hover {
     background-color: #000050;
-    transform: translateY(-4px);
+    transform: translateY(-3px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .navy-button.small {
-    padding: 10px 20px;
+    padding: 8px 16px;
     font-size: 1rem;
 }
 
-/* ===================== FOOTER ===================== */
+.navy-button.large {
+    padding: 18px 36px;
+    font-size: 1.3rem;
+}
+
+/* Admin notice */
+.admin-notice {
+    background: #ffe066;
+    color: #333;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* Footer */
 footer {
     background-color: rgb(32, 32, 132);
     color: white;
     text-align: center;
     padding: 20px;
-    font-size: 0.95rem;
+    margin-top: auto;
 }
 
-/* ===================== RESPONSIVE ===================== */
+/* Responsive Design */
 @media (max-width: 768px) {
-    .hero {
-        padding: 40px 30px;
+    .content-container {
+        padding: 25px;
         margin: 10px;
+    }
+    
+    .hero {
+        padding: 60px 15px;
     }
     
     .hero h1 {
         font-size: 2.2rem;
     }
     
-    header {
-        padding: 0 5%;
-        height: 70px;
+    h1 {
+        font-size: 2rem;
     }
     
-    .site-logo {
-        font-size: 24px;
+    h2 {
+        font-size: 1.6rem;
     }
     
-    .site-logo img {
-        height: 45px;
+    .dynamic-row {
+        flex-direction: column;
+    }
+    
+    .navy-button {
+        display: block;
+        text-align: center;
+        width: fit-content;
+        margin: 20px auto;
     }
 }
