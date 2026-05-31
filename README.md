@@ -24,7 +24,7 @@ npm start
 
 ## Test Accounts
 
-- **User**: peter@b.com / 123456789
+- **User**: ziombel / 1234
 - **Admin**: Totrek@example.com / A$AP_Rocky2609_Berlin
 
 ## Features
