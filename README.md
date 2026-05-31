@@ -5,19 +5,22 @@ A recipe management web application built with Node.js, Express, and EJS. Users 
 ## Quick Start
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
 
 2. Create a `.env` file:
+
 ```env
-PORT=3000
+PORT=8000
 SESSION_SECRET=your_secret_key
 ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=admin_password
 ```
 
 3. Start the app:
+
 ```bash
 npm start
 ```
