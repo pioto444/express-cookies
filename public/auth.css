@@ -1,11 +1,15 @@
-/* Reset */
+/* =========================
+   RESET
+========================= */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Page */
+/* =========================
+   PAGE LAYOUT
+========================= */
 body {
   min-height: 100vh;
   display: flex;
@@ -16,11 +20,13 @@ body {
   padding: 20px;
 }
 
-/* Login card */
+/* =========================
+   AUTH CARD
+========================= */
 main {
   width: 100%;
-  max-width: 420px;
-  background: white;
+  max-width: 450px;
+  background: #ffffff;
   border-radius: 20px;
   padding: 40px 35px;
   box-shadow:
@@ -28,19 +34,24 @@ main {
     0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-/* Title */
+/* =========================
+   TITLES
+========================= */
 h1 {
   text-align: center;
   margin-bottom: 30px;
   color: #111827;
   font-size: 2rem;
+  font-weight: 700;
 }
 
-/* Form */
+/* =========================
+   FORM
+========================= */
 .formularz {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 /* Labels */
@@ -48,10 +59,13 @@ label {
   font-size: 0.95rem;
   font-weight: 600;
   color: #374151;
-  margin-bottom: -10px;
+  margin-bottom: -8px;
 }
 
-/* Inputs */
+/* =========================
+   INPUTS
+========================= */
+input[type="text"],
 input[type="email"],
 input[type="password"] {
   width: 100%;
@@ -59,17 +73,27 @@ input[type="password"] {
   border: 1px solid #d1d5db;
   border-radius: 12px;
   font-size: 1rem;
+  background: #fff;
   transition: all 0.2s ease;
   outline: none;
 }
 
+/* Focus effect */
+input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
 }
 
-/* Login button */
+/* Placeholder */
+input::placeholder {
+  color: #9ca3af;
+}
+
+/* =========================
+   BUTTONS
+========================= */
 button[type="submit"] {
   margin-top: 10px;
   width: 100%;
@@ -89,15 +113,19 @@ button[type="submit"]:hover {
   transform: translateY(-2px);
 }
 
-/* Text under form */
+/* =========================
+   TEXT BELOW FORM
+========================= */
 p {
   text-align: center;
-  margin-top: 25px;
+  margin-top: 22px;
   color: #6b7280;
   font-size: 0.95rem;
 }
 
-/* Sign up button */
+/* =========================
+   SECONDARY BUTTON / LINK
+========================= */
 .navy-button {
   display: flex;
   justify-content: center;
@@ -118,13 +146,24 @@ p {
   transform: translateY(-2px);
 }
 
-/* Mobile */
+/* =========================
+   MOBILE
+========================= */
 @media (max-width: 480px) {
   main {
     padding: 30px 20px;
+    border-radius: 16px;
   }
 
   h1 {
     font-size: 1.7rem;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  button[type="submit"],
+  .navy-button {
+    padding: 13px;
   }
 }
